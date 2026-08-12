@@ -20,8 +20,8 @@ jobs:
         run: |
           SMITHY_VERSION="1.72.0"
           curl -sL "https://github.com/smithy-lang/smithy/releases/download/${SMITHY_VERSION}/smithy-cli-linux-x86_64.zip" -o smithy-cli.zip
-          unzip -q smithy-cli.zip -d smithy-cli
-          echo "$PWD/smithy-cli/bin" >> $GITHUB_PATH
+          unzip -q smithy-cli.zip
+          echo "$PWD/smithy-cli-linux-x86_64/bin" >> $GITHUB_PATH
 
       - name: Verify Smithy CLI
         run: smithy --version
