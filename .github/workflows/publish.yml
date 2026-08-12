@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Setup Smithy CLI
-        uses: smithy-lang/setup-smithy-cli@1c53b1041a109add89a70b3c9bdc4be536a761e2 # v1
+        uses: smithy-lang/setup-smithy-cli@41e027a71b22570ba53cfb958bac9199395a62b8 # v1
         with:
           version: '1.72.0'
           config: smithy-build.github.json
