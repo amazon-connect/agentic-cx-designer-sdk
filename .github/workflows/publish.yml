@@ -42,7 +42,7 @@ jobs:
           echo "Updated npm version: $(npm --version)"
 
       - name: Generate TypeScript client
-        run: smithy build --config smithy-build.github.json
+        run: smithy build --config smithy-build.json
 
       - name: Inject release version into package.json
         if: github.event_name == 'release'

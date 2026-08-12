@@ -32,7 +32,7 @@ jobs:
           node-version: 22
 
       - name: Generate TypeScript client
-        run: smithy build --config smithy-build.github.json
+        run: smithy build --config smithy-build.json
 
       - name: Install generated client dependencies
         working-directory: build/smithy/typescript-client/typescript-codegen
