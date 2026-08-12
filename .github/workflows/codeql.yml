@@ -1,0 +1,71 @@
+name: "CodeQL Advanced"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: '0 6 * * 1'
+
+jobs:
+  analyze-actions:
+    name: Analyze (actions)
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@74c8748a6f2dada2c01b25ae170d7858ac90f4af # v4.32.2
+        with:
+          languages: actions
+          build-mode: none
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@74c8748a6f2dada2c01b25ae170d7858ac90f4af # v4.32.2
+        with:
+          category: "/language:actions"
+  analyze-typescript:
+    name: Analyze (javascript-typescript)
+    runs-on: 'ubuntu-latest'
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+    - name: Install Smithy CLI
+      run: |
+        SMITHY_VERSION="1.72.0"
+        curl -sL "https://github.com/smithy-lang/smithy/releases/download/${SMITHY_VERSION}/smithy-cli-linux-x86_64.zip" -o smithy-cli.zip
+        unzip -q smithy-cli.zip
+        echo "$PWD/smithy-cli-linux-x86_64/bin" >> $GITHUB_PATH
+
+    - name: Setup Node.js
+      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      with:
+        node-version: 22
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@74c8748a6f2dada2c01b25ae170d7858ac90f4af # v4.32.2
+      with:
+        languages: javascript-typescript
+        build-mode: none
+
+    - name: Generate TypeScript client
+      run: smithy build --config smithy-build.json
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@74c8748a6f2dada2c01b25ae170d7858ac90f4af # v4.32.2
+      with:
+        category: "/language:javascript-typescript"
