@@ -19,11 +19,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Setup Smithy CLI
-        uses: smithy-lang/setup-smithy-cli@41e027a71b22570ba53cfb958bac9199395a62b8 # v1
-        with:
-          version: '1.72.0'
-          config: smithy-build.github.json
+      - name: Install Smithy CLI
+        run: |
+          SMITHY_VERSION="1.72.0"
+          curl -sL "https://github.com/smithy-lang/smithy/releases/download/${SMITHY_VERSION}/smithy-cli-linux-x86_64.zip" -o smithy-cli.zip
+          unzip -q smithy-cli.zip -d smithy-cli
+          echo "$PWD/smithy-cli/bin" >> $GITHUB_PATH
+
+      - name: Verify Smithy CLI
+        run: smithy --version
 
       - name: Setup Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
