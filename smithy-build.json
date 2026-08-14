@@ -12,7 +12,7 @@
       "plugins": {
         "typescript-codegen": {
           "service": "com.amazon.connect.acxd.sdk#AgenticCXDesignerService",
-          "package": "@amazon-connect/agentic-cx-designer-sdk",
+          "package": "amazon-connect-acxd-sdk",
           "packageVersion": "0.1.0"
         }
       }
