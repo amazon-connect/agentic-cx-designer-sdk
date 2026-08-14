@@ -28,7 +28,7 @@ jobs:
           build-mode: none
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@74c8748a6f2dada2c01b25ae170d7858ac90f4af # v4.32.2
+        uses: github/codeql-action/analyze@d97b3428e8eebbb1810cf454d6397886d136b4ba # v4.32.2
         with:
           category: "/language:actions"
   analyze-typescript:
@@ -66,6 +66,6 @@ jobs:
       run: smithy build --config smithy-build.json
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@74c8748a6f2dada2c01b25ae170d7858ac90f4af # v4.32.2
+      uses: github/codeql-action/analyze@d97b3428e8eebbb1810cf454d6397886d136b4ba # v4.32.2
       with:
         category: "/language:javascript-typescript"
