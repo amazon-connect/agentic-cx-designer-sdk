@@ -9,6 +9,11 @@ namespace com.amazon.connect.acxd.sdk
 @length(min: 36, max: 36)
 string UUIDv4
 
+/// A string containing sensitive data (PII, user messages, etc.).
+/// SDKs will not log or expose the value in toString() output.
+@sensitive
+string SensitiveString
+
 /// Supported language codes.
 enum LanguageCode {
     AR_AE = "ar-AE"

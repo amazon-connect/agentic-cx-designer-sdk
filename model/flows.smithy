@@ -167,7 +167,6 @@ enum GroundingType {
 enum GenerativeJourneyModalityTriggerType {
     MCP_FLOW = "mcpFlow"
     DATA_REQUEST = "dataRequest"
-    INTEGRATION = "integration"
     KNOWLEDGE_BASE = "knowledgeBase"
 }
 
@@ -175,7 +174,6 @@ structure GenerativeJourneyModalityTrigger {
     type: GenerativeJourneyModalityTriggerType
     variableId: String
     action: String
-    integrationName: String
     provider: String
     flowId: FlowId
     knowledgeBaseId: String
@@ -216,19 +214,11 @@ enum LoopType {
     LIST = "list"
 }
 
-enum DataRequestType {
-    MANAGED = "managed"
-    CUSTOM = "custom"
-}
-
 enum GenerativeModelType {
-    CUSTOM = "custom"
+    AMAZON_NOVA_MICRO = "amazon-nova-micro"
     AMAZON_NOVA_2_LITE = "amazon-nova-2-lite"
-    AMAZON_NOVA_PRO = "amazon-nova-pro"
-    ANTHROPIC_HAIKU_4_5 = "anthropic-haiku-4.5"
-    ANTHROPIC_OPUS_4_5 = "anthropic-opus-4.5"
-    CEREBRAS_LLAMA_3_3_70B = "cerebras-llama-3.3-70b"
-    CEREBRAS_OSS_120B = "cerebras-oss-120b"
+    ANTHROPIC_HAIKU_4_5 = "anthropic.claude-haiku-4-5"
+    ANTHROPIC_SONNET_5 = "anthropic.claude-sonnet-5"
 }
 
 enum FlowStateModificationType {
@@ -590,7 +580,6 @@ structure FlowStateModification {
 }
 
 structure NodeDataRequest {
-    type: DataRequestType
     dataRequestId: String
     urlParams: Document
     headers: Document
@@ -599,8 +588,6 @@ structure NodeDataRequest {
     name: String
     provider: String
     action: String
-    integrationType: String
-    integrationName: String
 }
 
 // ============================================================================
@@ -651,15 +638,9 @@ structure DefineConfig {
 }
 
 structure GenerativeTextConfig {
-    integrationType: String
-
-    integrationName: String
-
     name: String
 
     prompt: String
-
-    modelName: String
 
     includeTranscript: Boolean
 
@@ -683,12 +664,6 @@ structure GenerativeJourneyConfig {
     prompt: String
 
     modelType: GenerativeModelType
-
-    integrationType: String
-
-    integrationName: String
-
-    modelName: String
 
     exitConditions: ExitConditionList
 
@@ -741,11 +716,8 @@ structure ExitCondition {
 }
 
 structure AgenticTaskConfig {
-    integrationType: String
-    integrationName: String
     prompt: String
     exitCondition: String
-    modelName: String
     enableZeroTurnMode: Boolean
     includeTranscript: Boolean
     variableIds: FlowStringList
@@ -784,12 +756,6 @@ structure LoopConfig {
 
 structure MultimodalConfig {
     modelType: GenerativeModelType
-
-    integrationType: String
-
-    integrationName: String
-
-    modelName: String
 
     actions: MultimodalActionList
 
@@ -870,19 +836,12 @@ structure RedirectConfig {
     pageName: String
 }
 
-structure SplitConfig {
-    integrationType: String
-    integrationName: String
-    modelName: String
-}
+structure SplitConfig {}
 
 structure TransformConfig {
     input: Operand
     name: String
     transformations: TransformationList
-    integrationType: String
-    integrationName: String
-    modelName: String
 }
 
 structure Transformation {

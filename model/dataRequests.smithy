@@ -92,8 +92,6 @@ enum WebhookImplementation {
     INLINE_STATIC = "inline-static"
     EXTERNAL = "external"
     HOSTED = "hosted"
-    MANAGED = "managed"
-    FLOW_MODULE = "flow-module"
     MCP = "mcp"
 }
 
@@ -242,22 +240,9 @@ structure WebhookConfig {
 
     provider: WebhookProvider
 
-    flowModule: FlowModuleConfig
-
     mcp: WebhookMcpConfig
 
     sendContext: Boolean
-}
-
-structure FlowModuleConfig {
-    @required
-    @length(min: 1, max: 256)
-    moduleId: String
-
-    alias: String
-
-    @range(min: 1)
-    version: Long
 }
 
 structure WebhookMcpConfig {
