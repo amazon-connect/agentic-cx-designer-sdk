@@ -109,7 +109,6 @@ service AgenticCXDesignerService {
         GetFlow
         UpdateFlow
         DeleteFlow
-        ValidateFlow
         ListKnowledgeBases
         CreateKnowledgeBase
         GetKnowledgeBase

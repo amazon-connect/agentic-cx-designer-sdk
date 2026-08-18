@@ -61,11 +61,6 @@ enum LogEventType {
     RESPONSE_SKIPPED_AWAITING_USER_TURN = "ResponseSkippedAwaitingUserTurn"
 }
 
-enum LogRegion {
-    GLOBAL = "Global"
-    EU = "EU"
-}
-
 // ============================================================================
 // Custom Types — Logs
 // ============================================================================
@@ -80,8 +75,6 @@ structure QueryLogsRequest {
     timeFilter: LogTimeFilter
 
     searchFilter: LogSearchFilter
-
-    region: LogRegion
 
     sortOrder: SortOrder
 

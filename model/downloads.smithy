@@ -36,11 +36,6 @@ structure GetDownloadResponse {
 // ============================================================================
 // Shared Types (referenced by conversations.smithy, guardrails.smithy)
 // ============================================================================
-enum DownloadRegion {
-    GLOBAL = "Global"
-    EU = "EU"
-}
-
 enum BooleanString {
     TRUE = "true"
     FALSE = "false"

@@ -76,19 +76,6 @@ operation DeleteFlow {
     ]
 }
 
-/// Validates a flow configuration.
-@http(method: "POST", uri: "/sdk/flows/{flowIdentifier}/validation")
-operation ValidateFlow {
-    input: ValidateFlowRequest
-    output: ValidateFlowResponse
-    errors: [
-        ValidationException
-        ResourceNotFoundException
-        InternalServerException
-        ThrottlingException
-    ]
-}
-
 // ============================================================================
 // Custom Types — Flows
 // ============================================================================
@@ -337,19 +324,6 @@ structure DeleteFlowRequest {
     flowIdentifier: FlowId
 }
 
-structure ValidateFlowRequest {
-    @required
-    @httpLabel
-    flowIdentifier: FlowId
-
-    magicLayout: Boolean
-}
-
-structure ValidateFlowResponse {
-    @required
-    validation: Document
-}
-
 // ============================================================================
 // Resource Shapes
 // ============================================================================
@@ -546,8 +520,6 @@ structure FlowNodeMetadata {
     note: NoteConfig
 
     redirect: RedirectConfig
-
-    split: SplitConfig
 
     transform: TransformConfig
 
@@ -835,8 +807,6 @@ structure RedirectConfig {
 
     pageName: String
 }
-
-structure SplitConfig {}
 
 structure TransformConfig {
     input: Operand

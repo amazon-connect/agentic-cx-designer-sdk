@@ -244,9 +244,6 @@ structure ListGuardrailEventsRequest {
     @httpQuery("endTimestamp")
     endTimestamp: String
 
-    @httpQuery("region")
-    region: DownloadRegion
-
     @httpQuery("guardrailIdentifier")
     guardrailIdentifier: UUIDv4
 
