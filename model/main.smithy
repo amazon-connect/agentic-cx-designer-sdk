@@ -109,6 +109,19 @@ service AgenticCXDesignerService {
         GetFlow
         UpdateFlow
         DeleteFlow
+        ListLiveSyncScripts
+        CreateLiveSyncScript
+        GetLiveSyncScript
+        UpdateLiveSyncScript
+        DeleteLiveSyncScript
+        ListLiveSyncScriptBuilds
+        CreateLiveSyncScriptBuild
+        GetLiveSyncScriptBuild
+        ListLiveSyncScriptDeployments
+        CreateLiveSyncScriptDeployment
+        GetLiveSyncScriptDeployment
+        UpdateLiveSyncScriptDeployment
+        DeleteLiveSyncScriptDeployment
         ListKnowledgeBases
         CreateKnowledgeBase
         GetKnowledgeBase
