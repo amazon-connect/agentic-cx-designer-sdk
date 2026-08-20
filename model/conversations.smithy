@@ -142,7 +142,7 @@ structure Conversation {
     @required
     timestamp: String
 
-    userId: String
+    userId: SensitiveString
 
     applicationId: UUIDv4
 
@@ -170,9 +170,9 @@ structure ConversationSummary {
     @required
     conversationId: UUIDv4
 
-    userId: String
+    userId: SensitiveString
 
-    firstUtterance: String
+    firstUtterance: SensitiveString
 
     flowIds: StringList
 
@@ -194,7 +194,7 @@ structure ConversationMessage {
     @required
     isApplication: Boolean
 
-    text: String
+    text: SensitiveString
 
     timestamp: String
 

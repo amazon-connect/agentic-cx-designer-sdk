@@ -97,24 +97,13 @@ operation ListGuardrailEvents {
 // ============================================================================
 // Custom Types — Guardrails
 // ============================================================================
-@pattern("^[A-Za-z0-9 _-]+$")
+@pattern("^[A-Za-z0-9 ()_-]+$")
 @length(min: 1, max: 100)
 string GuardrailName
 
 @pattern("^[ -~]*$")
 @length(max: 100)
 string GuardrailDescription
-
-@length(max: 64)
-string IntegrationType
-
-@pattern("^[A-Za-z0-9 _-]+$")
-@length(min: 1, max: 32)
-string IntegrationName
-
-@pattern("^[A-Za-z0-9._-]+$")
-@length(max: 128)
-string ModelName
 
 enum GuardrailTrigger {
     INPUT = "input"
@@ -172,12 +161,6 @@ structure CreateGuardrailRequest {
 
     active: Boolean
 
-    integrationType: IntegrationType
-
-    integrationName: IntegrationName
-
-    modelName: ModelName
-
     metadata: GuardrailMetadata
 
     fallbackBehavior: FallbackBehavior
@@ -203,12 +186,6 @@ structure UpdateGuardrailRequest {
     description: GuardrailDescription
 
     active: Boolean
-
-    integrationType: IntegrationType
-
-    integrationName: IntegrationName
-
-    modelName: ModelName
 
     metadata: GuardrailMetadata
 
@@ -266,9 +243,6 @@ structure ListGuardrailEventsRequest {
     @required
     @httpQuery("endTimestamp")
     endTimestamp: String
-
-    @httpQuery("region")
-    region: DownloadRegion
 
     @httpQuery("guardrailIdentifier")
     guardrailIdentifier: UUIDv4
@@ -331,12 +305,6 @@ structure Guardrail {
 
     active: Boolean
 
-    integrationType: IntegrationType
-
-    integrationName: IntegrationName
-
-    modelName: ModelName
-
     metadata: GuardrailMetadata
 
     fallbackBehavior: FallbackBehavior
@@ -369,7 +337,7 @@ structure GuardrailRule {
     id: UUIDv4
 
     @required
-    @pattern("^[A-Za-z0-9 _-]+$")
+    @pattern("^[A-Za-z0-9 ()_-]+$")
     @length(max: 100)
     name: String
 
@@ -395,7 +363,7 @@ structure GuardrailRuleInput {
     id: UUIDv4
 
     @required
-    @pattern("^[A-Za-z0-9 _-]+$")
+    @pattern("^[A-Za-z0-9 ()_-]+$")
     @length(max: 100)
     name: String
 

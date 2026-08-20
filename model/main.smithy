@@ -11,6 +11,7 @@ use smithy.rules#endpointRuleSet
 /// Agentic CX Designer SDK Service — provides programmatic access to workspace resources.
 @restJson1
 @service(sdkId: "AgenticCXDesigner")
+@httpApiKeyAuth(name: "x-api-key", in: "header")
 @title("Agentic CX Designer SDK Service")
 @endpointRuleSet({
     version: "1.0"
@@ -70,11 +71,6 @@ service AgenticCXDesignerService {
         UpdateApplicationDeployment
         DeleteApplicationDeployment
         GetDownload
-        ListScheduledDownloads
-        CreateScheduledDownload
-        GetScheduledDownload
-        UpdateScheduledDownload
-        DeleteScheduledDownload
         CreateGuardrail
         GetGuardrail
         UpdateGuardrail
@@ -108,17 +104,24 @@ service AgenticCXDesignerService {
         ListResourceVersions
         GetResourceVersion
         QueryLogs
-        ListScenarios
-        CreateScenario
-        GetScenario
-        UpdateScenario
-        DeleteScenario
         ListFlows
         CreateFlow
         GetFlow
         UpdateFlow
         DeleteFlow
-        ValidateFlow
+        ListLiveSyncScripts
+        CreateLiveSyncScript
+        GetLiveSyncScript
+        UpdateLiveSyncScript
+        DeleteLiveSyncScript
+        ListLiveSyncScriptBuilds
+        CreateLiveSyncScriptBuild
+        GetLiveSyncScriptBuild
+        ListLiveSyncScriptDeployments
+        CreateLiveSyncScriptDeployment
+        GetLiveSyncScriptDeployment
+        UpdateLiveSyncScriptDeployment
+        DeleteLiveSyncScriptDeployment
         ListKnowledgeBases
         CreateKnowledgeBase
         GetKnowledgeBase
@@ -157,8 +160,6 @@ service AgenticCXDesignerService {
         DeleteRole
         GetRolePermissions
         GetTeam
-        UpdateTeam
-        CreateTeam
         ListWorkspaces
         CreateWorkspace
         GetWorkspace

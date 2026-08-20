@@ -34,6 +34,9 @@ jobs:
       - name: Generate TypeScript client
         run: smithy build --config smithy-build.json
 
+      - name: Inject SDK client wrapper
+        run: node scripts/inject-wrapper.mjs
+
       - name: Install generated client dependencies
         working-directory: build/smithy/typescript-client/typescript-codegen
         run: npm install

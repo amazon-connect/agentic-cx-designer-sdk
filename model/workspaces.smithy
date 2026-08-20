@@ -132,8 +132,6 @@ structure Workspace {
 
     tags: WorkspaceTagList
 
-    version: String
-
     createdAt: DateTime
 
     updatedAt: DateTime

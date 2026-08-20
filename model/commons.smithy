@@ -9,6 +9,11 @@ namespace com.amazon.connect.acxd.sdk
 @length(min: 36, max: 36)
 string UUIDv4
 
+/// A string containing sensitive data (PII, user messages, etc.).
+/// SDKs will not log or expose the value in toString() output.
+@sensitive
+string SensitiveString
+
 /// Supported language codes.
 enum LanguageCode {
     AR_AE = "ar-AE"
@@ -104,42 +109,6 @@ list LanguageCodeList {
     member: LanguageCode
 }
 
-/// S3 bucket destination for scheduled downloads.
-structure AwsS3Destination {
-    @required
-    bucket: String
-
-    keyPrefix: String
-
-    keyName: String
-
-    region: String
-
-    customerRoleArn: String
-}
-
-/// SFTP server destination for scheduled downloads.
-structure SftpServerDestination {
-    @required
-    url: String
-
-    connectorId: String
-
-    username: String
-
-    trustedHostKeys: TrustedHostKeyList
-
-    remoteDirectoryPath: String
-
-    pgpKey: String
-
-    supportsRSAHostKey: Boolean
-}
-
-list TrustedHostKeyList {
-    member: String
-}
-
 /// A simple state modification applied during guardrail enforcement or flow execution.
 structure SimpleStateModification {
     type: StateModificationType
@@ -228,9 +197,6 @@ enum SortOrder {
     ASC = "asc"
     DESC = "desc"
 }
-
-/// Duration window in hours.
-integer DurationInHours
 
 /// Conversation identifier — alphanumeric with dashes, underscores, dots, and colons.
 @pattern("^[A-Za-z0-9-_.:]+$")

@@ -585,14 +585,7 @@ structure LanguageSetting {
     @default("")
     projectId: String
 
-    region: LanguageRegion
-
     voice: String
-}
-
-enum LanguageRegion {
-    GLOBAL = "global"
-    EU = "eu"
 }
 
 structure LifecycleHooks {

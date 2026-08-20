@@ -24,46 +24,179 @@ operation QueryLogs {
 // ============================================================================
 enum LogEventType {
     AUTO_ESCALATION_STATE = "AutoEscalationState"
-    CHOICE_AUTOTRAVERSED = "ChoiceAutotraversed"
-    CHOICE_SELECTED = "ChoiceSelected"
-    CONDITION_EVALUATED = "ConditionEvaluated"
-    CONTEXT_VARIABLES_MODIFIED = "ContextVariablesModified"
-    CONVERSATION_ENDED = "ConversationEnded"
-    CONVERSATION_ESCALATED = "ConversationEscalated"
-    CONVERSATION_STARTED = "ConversationStarted"
-    DEFAULT_FLOW_RETRIEVAL = "DefaultFlowRetrieval"
-    EXTERNAL_PROCESSING_COMPLETED = "ExternalProcessingCompleted"
-    EXTERNAL_PROCESSING_HOOK_INVOKED = "ExternalProcessingHookInvoked"
-    EXTERNAL_PROCESSING_HOOK_RESPONDED = "ExternalProcessingHookResponded"
-    EXTERNAL_PROCESSING_STATUS_UPDATED = "ExternalProcessingStatusUpdated"
-    FALLBACK_STATE = "FallbackState"
-    FRUSTRATION_STATE = "FrustrationState"
-    INCOMPREHENSION_STATE = "IncomprehensionState"
-    FLOW_CAPTURE_STATE = "FlowCaptureState"
-    FLOW_REDIRECTION = "FlowRedirection"
-    LIFECYCLE_HOOK_INVOKED = "LifecycleHookInvoked"
-    LIFECYCLE_HOOK_RESPONDED = "LifecycleHookResponded"
-    NLP_INVOKED = "NlpInvoked"
-    NLP_RESPONDED = "NlpResponded"
-    NLU_REQUEST_RECEIVED = "NluRequestReceived"
-    NLU_RESPONDED = "NluResponded"
-    NODE_MET_ALL_CONDITIONS = "NodeMetAllConditions"
-    NODE_TRAVERSAL = "NodeTraversal"
-    REPEAT_STATE = "RepeatState"
-    STATE_CREATED = "StateCreated"
-    STATE_RETRIEVED_FROM_CACHE = "StateRetrievedFromCache"
-    STATE_VALUES_EJECTED = "StateValuesEjected"
-    SUBTREE_TRAVERSAL = "SubtreeTraversal"
-    DATA_REQUEST_RESOLUTION_FAILED = "DataRequestResolutionFailed"
-    DATA_REQUESTS_REQUESTED = "DataRequestsRequested"
-    DATA_REQUESTS_RETURNED = "DataRequestsReturned"
-    WAIT_STATE = "WaitState"
-    RESPONSE_SKIPPED_AWAITING_USER_TURN = "ResponseSkippedAwaitingUserTurn"
-}
 
-enum LogRegion {
-    GLOBAL = "Global"
-    EU = "EU"
+    CHOICE_AUTOTRAVERSED = "ChoiceAutotraversed"
+
+    CHOICE_SELECTED = "ChoiceSelected"
+
+    CONDITION_EVALUATED = "ConditionEvaluated"
+
+    CONTEXT_VARIABLES_MODIFIED = "ContextVariablesModified"
+
+    CONVERSATION_ENDED = "ConversationEnded"
+
+    CONVERSATION_ESCALATED = "ConversationEscalated"
+
+    CONVERSATION_STARTED = "ConversationStarted"
+
+    DEFAULT_FLOW_RETRIEVAL = "DefaultFlowRetrieval"
+
+    EXTERNAL_PROCESSING_COMPLETED = "ExternalProcessingCompleted"
+
+    EXTERNAL_PROCESSING_HOOK_INVOKED = "ExternalProcessingHookInvoked"
+
+    EXTERNAL_PROCESSING_HOOK_RESPONDED = "ExternalProcessingHookResponded"
+
+    EXTERNAL_PROCESSING_STATUS_UPDATED = "ExternalProcessingStatusUpdated"
+
+    FALLBACK_STATE = "FallbackState"
+
+    FRUSTRATION_STATE = "FrustrationState"
+
+    INCOMPREHENSION_STATE = "IncomprehensionState"
+
+    FLOW_CAPTURE_STATE = "FlowCaptureState"
+
+    FLOW_REDIRECTION = "FlowRedirection"
+
+    LIFECYCLE_HOOK_INVOKED = "LifecycleHookInvoked"
+
+    LIFECYCLE_HOOK_RESPONDED = "LifecycleHookResponded"
+
+    NLU_REQUEST_RECEIVED = "NluRequestReceived"
+
+    NLU_RESPONDED = "NluResponded"
+
+    NODE_MET_ALL_CONDITIONS = "NodeMetAllConditions"
+
+    NODE_TRAVERSAL = "NodeTraversal"
+
+    REPEAT_STATE = "RepeatState"
+
+    STATE_VALUES_EJECTED = "StateValuesEjected"
+
+    SUBTREE_TRAVERSAL = "SubtreeTraversal"
+
+    DATA_REQUEST_RESOLUTION_FAILED = "DataRequestResolutionFailed"
+
+    DATA_REQUESTS_REQUESTED = "DataRequestsRequested"
+
+    DATA_REQUESTS_RETURNED = "DataRequestsReturned"
+
+    WAIT_STATE = "WaitState"
+
+    RESPONSE_SKIPPED_AWAITING_USER_TURN = "ResponseSkippedAwaitingUserTurn"
+
+    // ---- Promoted debugger diagnostics (pre-GA canonical cutover) ----
+    AGENT_STARTED = "AgentStarted"
+
+    AGENT_ENDED = "AgentEnded"
+
+    AGENTIC_TOOL_START = "AgenticToolStart"
+
+    AGENTIC_TOOL_END = "AgenticToolEnd"
+
+    AGENTIC_DATA_CAPTURE = "AgenticDataCapture"
+
+    MODEL_START = "ModelStart"
+
+    MODEL_END = "ModelEnd"
+
+    MODEL_ERROR = "ModelError"
+
+    MODEL_TIMEOUT = "ModelTimeout"
+
+    TOOL_START = "ToolStart"
+
+    TOOL_END = "ToolEnd"
+
+    TOOL_HALLUCINATION = "ToolHallucination"
+
+    HALLUCINATION_HEALED = "HallucinationHealed"
+
+    GUARDRAILS_START = "GuardrailsStart"
+
+    GUARDRAILS_END = "GuardrailsEnd"
+
+    GUARDRAIL_RULE_EVALUATED = "GuardrailRuleEvaluated"
+
+    GUARDRAIL_RULE_TRIGGERED = "GuardrailRuleTriggered"
+
+    GENERATIVE_JOURNEY_STARTED = "GenerativeJourneyStarted"
+
+    GENERATIVE_JOURNEY_SUCCEEDED = "GenerativeJourneySucceeded"
+
+    GENERATIVE_JOURNEY_TIMEOUT = "GenerativeJourneyTimeout"
+
+    GENERATIVE_JOURNEY_ZERO_TURN_COMPLETED = "GenerativeJourneyZeroTurnCompleted"
+
+    GENERATIVE_RESPONSE = "GenerativeResponse"
+
+    GENERATIVE_CONDITION_EVALUATED = "GenerativeConditionEvaluated"
+
+    MULTIMODAL_STARTED = "MultimodalStarted"
+
+    MULTIMODAL_ENDED = "MultimodalEnded"
+
+    MULTIMODAL_STEP = "MultimodalStep"
+
+    MULTIMODAL_ACTION_TRIGGERED = "MultimodalActionTriggered"
+
+    KB_INVOKED = "KbInvoked"
+
+    DOCUMENT_RETRIEVAL = "DocumentRetrieval"
+
+    DATA_REQUEST_FAILURE = "DataRequestFailure"
+
+    DATA_REQUEST_SUCCESS = "DataRequestSuccess"
+
+    DATA_REQUEST_TIMEOUT = "DataRequestTimeout"
+
+    ASYNC_DATA_REQUEST_INVOKED = "AsyncDataRequestInvoked"
+
+    ASYNC_DATA_REQUEST_SUCCESS = "AsyncDataRequestSuccess"
+
+    ASYNC_DATA_REQUEST_FAILURE = "AsyncDataRequestFailure"
+
+    ASYNC_DATA_REQUEST_TIMEOUT = "AsyncDataRequestTimeout"
+
+    DATA_TRANSFORMED = "DataTransformed"
+
+    LOOP_ITERATION = "LoopIteration"
+
+    INFINITE_LOOP = "InfiniteLoop"
+
+    LIFECYCLE_HOOK_VALIDATION_FAILED = "LifecycleHookValidationFailed"
+
+    WEBHOOK_RESPONSE_VALIDATION_FAILED = "WebhookResponseValidationFailed"
+
+    SEND_ACTION_ATTEMPT = "SendActionAttempt"
+
+    SEND_ACTION_SUCCESS = "SendActionSuccess"
+
+    SEND_ACTION_ERROR = "SendActionError"
+
+    REQUEST_OVERRIDDEN = "RequestOverridden"
+
+    RESPONSE_OVERRIDDEN = "ResponseOverridden"
+
+    CONTENT_NOT_FOUND = "ContentNotFound"
+
+    USER_FEEDBACK = "UserFeedback"
+
+    VOICE_CALL_COUNT = "VoiceCallCount"
+
+    ESCALATION_STATE = "EscalationState"
+
+    REDIRECTION = "Redirection"
+
+    ERROR = "Error"
+
+    DATA_REQUEST_RESOLUTION_EXCEPTION = "DataRequestResolutionException"
+
+    DATA_REQUEST_RESOLUTION_TIMEOUT = "DataRequestResolutionTimeout"
+
+    APPLICATION_HANDOFF = "ApplicationHandoff"
 }
 
 // ============================================================================
@@ -80,8 +213,6 @@ structure QueryLogsRequest {
     timeFilter: LogTimeFilter
 
     searchFilter: LogSearchFilter
-
-    region: LogRegion
 
     sortOrder: SortOrder
 

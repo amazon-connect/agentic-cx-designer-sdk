@@ -126,11 +126,7 @@ operation ListKnowledgeBasePublications {
 // ============================================================================
 /// The type of knowledge base.
 enum KnowledgeBaseType {
-    STATIC = "static"
-    DYNAMIC = "dynamic"
     ARTICLES = "articles"
-    CUSTOM = "custom"
-    INTEGRATION = "integration"
     DOCUMENTS = "documents"
 }
 
