@@ -409,6 +409,8 @@ structure UpdateApplicationDeploymentRequest {
 
     environment: DeploymentEnvironment
 
+    // Server requires at least one language code on update (400 otherwise).
+    @required
     languageCodes: LanguageCodeList
 
     analyticsTags: AnalyticsTagReferenceList

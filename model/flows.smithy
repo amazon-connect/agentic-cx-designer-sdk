@@ -251,10 +251,6 @@ structure CreateFlowRequest {
     @required
     flowId: FlowId
 
-    @required
-    utterances: UtteranceList
-
-    @required
     description: FlowDescription
 
     aiDescription: FlowAiDescription

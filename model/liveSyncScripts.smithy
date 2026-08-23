@@ -270,6 +270,8 @@ structure CreateLiveSyncScriptBuildRequest {
     @httpLabel
     liveSyncScriptIdentifier: UUIDv4
 
+    version: BuildVersion
+
     description: LiveSyncScriptDescription
 
     languageSettings: LanguageSettingList
@@ -315,6 +317,10 @@ structure CreateLiveSyncScriptDeploymentRequest {
 
     @required
     buildIdentifier: UUIDv4
+
+    // Server requires a version on deployment ("version is required" otherwise).
+    @required
+    version: BuildVersion
 
     description: LiveSyncScriptDescription
 
