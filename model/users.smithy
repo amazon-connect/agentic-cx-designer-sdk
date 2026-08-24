@@ -97,6 +97,12 @@ structure ListUsersResponse {
     nextToken: String
 }
 
+/// Input for CreateUser.
+///
+/// `roles` is conditionally required: it must contain at least one entry unless
+/// `cxnRole` is "administrator". `defaultRole` is optional and is not a
+/// substitute for `roles` — supplying only `defaultRole` fails when `roles` is
+/// required.
 structure CreateUserRequest {
     @required
     userId: String
@@ -104,6 +110,11 @@ structure CreateUserRequest {
     @required
     cxnRole: CxnRole
 
+    /// ARN of a Connect agent, in the form
+    /// `arn:aws:connect:<region>:<account>:instance/<instanceId>/agent/<userId>`.
+    /// Only the `aws` and `aws-us-gov` partitions are accepted, and both IDs must
+    /// be lowercase UUIDs. Validated for format only — the agent's existence in
+    /// Connect is not checked here.
     @required
     userArn: String
 
@@ -124,8 +135,14 @@ structure CreateUserRequest {
 
     applicationIds: ApplicationIdList
 
+    /// Application-scoped role assignments. Required unless `cxnRole` is
+    /// "administrator" — see the structure documentation above. Each entry needs
+    /// an `applicationId` and a `role`; duplicate `applicationId` values are
+    /// rejected when this requirement applies.
     roles: UserRoleAssignmentList
 
+    /// Workspace-wide default role. Always optional, and does not satisfy the
+    /// `roles` requirement.
     defaultRole: UserDefaultRole
 }
 

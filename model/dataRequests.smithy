@@ -88,10 +88,8 @@ enum DataRequestFieldType {
 }
 
 enum WebhookImplementation {
-    INLINE = "inline"
     INLINE_STATIC = "inline-static"
     EXTERNAL = "external"
-    HOSTED = "hosted"
     MCP = "mcp"
 }
 

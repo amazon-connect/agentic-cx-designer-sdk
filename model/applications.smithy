@@ -578,8 +578,6 @@ structure LanguageSetting {
     @required
     languageCode: LanguageCode
 
-    useNativeLanguage: Boolean
-
     useLex3pAsr: Boolean
 
     @default("")
