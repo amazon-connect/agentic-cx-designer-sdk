@@ -22,13 +22,13 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@74c8748a6f2dada2c01b25ae170d7858ac90f4af # v4.32.2
+        uses: github/codeql-action/init@486fec2a3ea2626afcd8c7e9208b4f515078dd7e # v4.32.2
         with:
           languages: actions
           build-mode: none
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@74c8748a6f2dada2c01b25ae170d7858ac90f4af # v4.32.2
+        uses: github/codeql-action/analyze@486fec2a3ea2626afcd8c7e9208b4f515078dd7e # v4.32.2
         with:
           category: "/language:actions"
   analyze-typescript:
@@ -57,7 +57,7 @@ jobs:
         node-version: 22
 
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@74c8748a6f2dada2c01b25ae170d7858ac90f4af # v4.32.2
+      uses: github/codeql-action/init@486fec2a3ea2626afcd8c7e9208b4f515078dd7e # v4.32.2
       with:
         languages: javascript-typescript
         build-mode: none
@@ -66,6 +66,6 @@ jobs:
       run: smithy build --config smithy-build.json
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@74c8748a6f2dada2c01b25ae170d7858ac90f4af # v4.32.2
+      uses: github/codeql-action/analyze@486fec2a3ea2626afcd8c7e9208b4f515078dd7e # v4.32.2
       with:
         category: "/language:javascript-typescript"
