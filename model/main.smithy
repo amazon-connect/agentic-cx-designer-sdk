@@ -10,8 +10,8 @@ use smithy.rules#endpointRuleSet
 
 /// Agentic CX Designer SDK Service — provides programmatic access to workspace resources.
 @restJson1
-@httpApiKeyAuth(name: "x-api-key", in: "header")
 @service(sdkId: "AgenticCXDesigner")
+@httpApiKeyAuth(name: "x-api-key", in: "header")
 @title("Agentic CX Designer SDK Service")
 @endpointRuleSet({
     version: "1.0"
