@@ -93,7 +93,6 @@ string FlowAiDescription
 
 enum FlowNodeType {
     BASIC = "basic"
-    APPLICATION_HANDOFF = "application_handoff"
     CHOICE = "choice"
     DATA_REQUEST = "data_request"
     END = "end"
@@ -251,10 +250,6 @@ structure CreateFlowRequest {
     @required
     flowId: FlowId
 
-    @required
-    utterances: UtteranceList
-
-    @required
     description: FlowDescription
 
     aiDescription: FlowAiDescription
@@ -292,8 +287,6 @@ structure UpdateFlowRequest {
     @required
     @httpLabel
     flowIdentifier: FlowId
-
-    utterances: UtteranceList
 
     nodes: FlowNodeMap
 
@@ -343,8 +336,6 @@ structure Flow {
 
     languageCodes: LanguageCodeList
 
-    utterances: UtteranceList
-
     slotTypes: AttachedSlotList
 
     contextVariables: FlowContextVariableList
@@ -372,21 +363,6 @@ structure FlowMetadata {
 // ============================================================================
 // Flow Core Structures
 // ============================================================================
-structure Utterance {
-    @required
-    @length(min: 2, max: 128)
-    text: String
-
-    @length(min: 2)
-    valueId: String
-
-    skipTraining: Boolean
-
-    skipTranslation: Boolean
-
-    translated: Boolean
-}
-
 structure AttachedSlot {
     @required
     @pattern("^[A-Za-z]+$")
@@ -497,8 +473,6 @@ structure FlowNodeMetadata {
 
     flowId: FlowId
 
-    applicationHandoff: ApplicationHandoffConfig
-
     code: CodeConfig
 
     choice: ChoiceConfig
@@ -529,14 +503,14 @@ structure FlowNodeMetadata {
 
     interimMessages: InterimMessageList
 
+    voiceSettings: VoiceSettings
+
     stateModifications: FlowStateModificationList
 
     sendContext: Boolean
 
     @range(max: 30000)
     timeout: Integer
-
-    enableInProgressEdge: Boolean
 }
 
 structure NodeAnalyticsTag {
@@ -565,17 +539,30 @@ structure NodeDataRequest {
 // ============================================================================
 // Node Metadata Sub-Configs
 // ============================================================================
-structure ApplicationHandoffConfig {
-    applicationId: String
-    flowId: FlowId
-    channelId: String
-    channelType: String
-    deploymentStage: DeploymentStage
-}
+structure VoiceSettings {
+    interruptionEnabled: Boolean
 
-enum DeploymentStage {
-    STAGING = "staging"
-    PRODUCTION = "production"
+    speechInputEnabled: Boolean
+
+    @range(min: 0, max: 30000)
+    voiceStartTimeout: Integer
+
+    @range(min: 0, max: 5000)
+    voiceEndTimeout: Integer
+
+    dtmfInputEnabled: Boolean
+
+    @pattern("^[0-9#*]$")
+    dtmfDeletionKey: String
+
+    @pattern("^[0-9#*]$")
+    dtmfEndKey: String
+
+    @range(min: 0, max: 30000)
+    dtmfEndTimeout: Integer
+
+    @range(min: 1, max: 2048)
+    dtmfMaxDigits: Integer
 }
 
 structure CodeConfig {
@@ -861,10 +848,6 @@ structure FlowSummary {
 @length(max: 5)
 list FlowTagList {
     member: String
-}
-
-list UtteranceList {
-    member: Utterance
 }
 
 @length(max: 100)

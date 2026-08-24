@@ -211,7 +211,6 @@ structure _BaseMessage {
     body: String
     skipTranslation: Boolean
     translated: Boolean
-    metadata: MessageMetadata
 }
 
 /// A message with required type and body.
@@ -226,14 +225,6 @@ structure Message with [_BaseMessage] {
 enum MessageType {
     TEXT = "text"
     SSML = "ssml"
-}
-
-structure MessageMetadata {
-    alternatePhrasings: AlternatePhraseList
-}
-
-list AlternatePhraseList {
-    member: String
 }
 
 list MessageList {

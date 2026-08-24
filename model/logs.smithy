@@ -25,29 +25,11 @@ operation QueryLogs {
 enum LogEventType {
     AUTO_ESCALATION_STATE = "AutoEscalationState"
 
-    CHOICE_AUTOTRAVERSED = "ChoiceAutotraversed"
-
     CHOICE_SELECTED = "ChoiceSelected"
 
     CONDITION_EVALUATED = "ConditionEvaluated"
 
-    CONTEXT_VARIABLES_MODIFIED = "ContextVariablesModified"
-
-    CONVERSATION_ENDED = "ConversationEnded"
-
-    CONVERSATION_ESCALATED = "ConversationEscalated"
-
-    CONVERSATION_STARTED = "ConversationStarted"
-
     DEFAULT_FLOW_RETRIEVAL = "DefaultFlowRetrieval"
-
-    EXTERNAL_PROCESSING_COMPLETED = "ExternalProcessingCompleted"
-
-    EXTERNAL_PROCESSING_HOOK_INVOKED = "ExternalProcessingHookInvoked"
-
-    EXTERNAL_PROCESSING_HOOK_RESPONDED = "ExternalProcessingHookResponded"
-
-    EXTERNAL_PROCESSING_STATUS_UPDATED = "ExternalProcessingStatusUpdated"
 
     FALLBACK_STATE = "FallbackState"
 
@@ -75,19 +57,14 @@ enum LogEventType {
 
     STATE_VALUES_EJECTED = "StateValuesEjected"
 
-    SUBTREE_TRAVERSAL = "SubtreeTraversal"
-
     DATA_REQUEST_RESOLUTION_FAILED = "DataRequestResolutionFailed"
 
     DATA_REQUESTS_REQUESTED = "DataRequestsRequested"
 
     DATA_REQUESTS_RETURNED = "DataRequestsReturned"
 
-    WAIT_STATE = "WaitState"
-
     RESPONSE_SKIPPED_AWAITING_USER_TURN = "ResponseSkippedAwaitingUserTurn"
 
-    // ---- Promoted debugger diagnostics (pre-GA canonical cutover) ----
     AGENT_STARTED = "AgentStarted"
 
     AGENT_ENDED = "AgentEnded"
@@ -184,8 +161,6 @@ enum LogEventType {
 
     USER_FEEDBACK = "UserFeedback"
 
-    VOICE_CALL_COUNT = "VoiceCallCount"
-
     ESCALATION_STATE = "EscalationState"
 
     REDIRECTION = "Redirection"
@@ -195,8 +170,6 @@ enum LogEventType {
     DATA_REQUEST_RESOLUTION_EXCEPTION = "DataRequestResolutionException"
 
     DATA_REQUEST_RESOLUTION_TIMEOUT = "DataRequestResolutionTimeout"
-
-    APPLICATION_HANDOFF = "ApplicationHandoff"
 }
 
 // ============================================================================
