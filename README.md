@@ -16,7 +16,7 @@ import { AgenticCXDesignerClient, ListApplicationsCommand } from "amazon-connect
 const client = new AgenticCXDesignerClient({
   region: "us-west-2",
   apiKey: "REPLACE_WITH_API_KEY",
-  workspaceId: "REPLACE_WITH_WORKSPACE_ID",
+  workspaceId: "REPLACE_WITH_WORKSPACE_ID", // required for workspace-scoped operations
 });
 
 const response = await client.send(new ListApplicationsCommand({}));
@@ -25,9 +25,27 @@ console.log(response.items);
 
 ## Examples
 
-Pass your API key and workspace ID directly to the client constructor. Every
-request is then authenticated automatically — no middleware to wire up. The
-examples below share a single `client`:
+### Getting an API key
+
+The SDK authenticates with an API key that belongs to a **programmatic user** (a
+machine identity). The first programmatic user must be created from the UI — you
+can't call the SDK until you have a key. Once you have one, you can manage further
+programmatic users programmatically (see [Managing programmatic users](#managing-programmatic-users)).
+
+1. In Agentic CX Designer Studio, go to **Admin Hub → Programmatic Users** (account
+   administrator access required).
+2. **Create Programmatic User** — give it a name and assign a role via `roleConfig`
+   (an account-level role for full access, or workspace-scoped roles).
+3. Select the user and **Generate API Key**. Copy it immediately — the key
+   (`acxd_live_<prefix>.<secret>`) is shown only once and can't be retrieved later.
+   You can have up to 2 keys per user.
+
+### Creating a client
+
+Pass your API key directly to the client constructor. `workspaceId` is required for
+**workspace-scoped** operations (applications, flows, secrets, …) and is not needed
+for **account-level** operations (managing programmatic users, workspaces). The
+examples below share this `client`:
 
 ```javascript
 import { AgenticCXDesignerClient } from "amazon-connect-acxd-sdk";
@@ -35,16 +53,21 @@ import { AgenticCXDesignerClient } from "amazon-connect-acxd-sdk";
 const client = new AgenticCXDesignerClient({
   region: "us-west-2",
   apiKey: process.env.ACXD_API_KEY,
-  workspaceId: process.env.ACXD_WORKSPACE_ID,
+  workspaceId: process.env.ACXD_WORKSPACE_ID, // omit for account-level operations
 });
 ```
 
-### Creating a programmatic user
+The API key is just a credential — it carries no permissions itself. Permissions are
+resolved at request time from the programmatic user's assigned role, so role changes
+in Admin Hub take effect immediately.
 
-Programmatic users are the machine identities that authenticate with the SDK. A
-`roleConfig` determines their access — either an account-level role (full access
-across all workspaces) or workspace-scoped roles. Only account administrators can
-create them.
+### Managing programmatic users
+
+Once you have a key, you can create and manage additional programmatic users via the
+SDK. These are **account-level** operations, so `workspaceId` is not required. Only
+account administrators can perform them. A `roleConfig` determines each user's access
+— either an account-level role (full access across all workspaces) or workspace-scoped
+roles.
 
 ```javascript
 import { CreateProgrammaticUserCommand } from "amazon-connect-acxd-sdk";
@@ -72,8 +95,8 @@ const scoped = await client.send(
 );
 ```
 
-Generate an API key for the user in NLX Studio → Admin Hub (max 2 per user); the
-key is shown only once.
+Generate an API key for the new user in Admin Hub (max 2 per user); the key is shown
+only once.
 
 ### Applications
 
