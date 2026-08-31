@@ -213,6 +213,10 @@ structure CreateLiveSyncScriptRequest {
 
     description: LiveSyncScriptDescription
 
+    mainLanguageCode: LanguageCode
+
+    languageCodes: LanguageCodeList
+
     metadata: LiveSyncScriptMetadata
 }
 
@@ -232,6 +236,10 @@ structure UpdateLiveSyncScriptRequest {
     steps: LiveSyncScriptStepList
 
     description: LiveSyncScriptDescription
+
+    mainLanguageCode: LanguageCode
+
+    languageCodes: LanguageCodeList
 
     metadata: LiveSyncScriptMetadata
 }
@@ -381,6 +389,10 @@ structure LiveSyncScript {
     steps: LiveSyncScriptStepList
 
     description: LiveSyncScriptDescription
+
+    mainLanguageCode: LanguageCode
+
+    languageCodes: LanguageCodeList
 
     metadata: LiveSyncScriptMetadata
 

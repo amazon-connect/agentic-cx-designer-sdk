@@ -114,6 +114,8 @@ structure ApiToken {
 
     @required
     createdAt: DateTime
+
+    lastAccessedAt: DateTime
 }
 
 list ApiTokenList {

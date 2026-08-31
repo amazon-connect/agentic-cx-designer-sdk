@@ -17,25 +17,9 @@ use smithy.rules#endpointRuleSet
     version: "1.0"
     serviceId: "AgenticCXDesigner"
     parameters: {
-        Endpoint: { type: "String", builtIn: "SDK::Endpoint", required: false, documentation: "Override the endpoint URL" }
         Region: { type: "String", builtIn: "AWS::Region", required: true, documentation: "The AWS region to send requests to" }
     }
     rules: [
-        {
-            documentation: "Use custom endpoint if provided"
-            type: "endpoint"
-            conditions: [
-                {
-                    fn: "isSet"
-                    argv: [
-                        {
-                            ref: "Endpoint"
-                        }
-                    ]
-                }
-            ]
-            endpoint: { url: "{Endpoint}" }
-        }
         {
             documentation: "Default regional endpoint"
             type: "endpoint"

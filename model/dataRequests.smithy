@@ -234,7 +234,7 @@ structure WebhookConfig {
     @length(max: 200000)
     code: String
 
-    environments: Document
+    environments: WebhookEnvironments
 
     provider: WebhookProvider
 
@@ -251,11 +251,24 @@ structure WebhookMcpConfig {
 
     headers: WebhookHeaderList
 
-    environments: Document
+    environments: WebhookEnvironments
 
     tools: McpToolList
 
     syncedAt: DateTime
+}
+
+structure WebhookEnvironments {
+    production: WebhookEnvironment
+    development: WebhookEnvironment
+}
+
+structure WebhookEnvironment {
+    @required
+    @length(max: 2048)
+    url: String
+
+    headers: WebhookHeaderList
 }
 
 structure McpTool {

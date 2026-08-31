@@ -299,7 +299,6 @@ The SDK resolves the service endpoint from the region:
 | Configuration | Endpoint |
 |---|---|
 | `region: 'us-west-2'` | `https://api.acxd.connect.us-west-2.amazonaws.com` |
-| `endpoint: 'https://custom-url'` | Uses the override (for testing) |
 
 ## Security
 

@@ -601,8 +601,6 @@ structure GenerativeTextConfig {
 
     prompt: String
 
-    includeTranscript: Boolean
-
     groundingType: GroundingType
 
     timeout: Integer
