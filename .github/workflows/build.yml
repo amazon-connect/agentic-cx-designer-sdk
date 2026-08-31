@@ -1,0 +1,56 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  generate-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install Smithy CLI
+        run: |
+          SMITHY_VERSION="1.72.0"
+          curl -sL "https://github.com/smithy-lang/smithy/releases/download/${SMITHY_VERSION}/smithy-cli-linux-x86_64.zip" -o smithy-cli.zip
+          unzip -q smithy-cli.zip
+          echo "$PWD/smithy-cli-linux-x86_64/bin" >> $GITHUB_PATH
+
+      - name: Verify Smithy CLI
+        run: smithy --version
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+
+      - name: Generate TypeScript client
+        run: smithy build --config smithy-build.json
+
+      - name: Inject SDK client wrapper
+        run: node scripts/inject-wrapper.mjs
+
+      - name: Install generated client dependencies
+        working-directory: build/smithy/typescript-client/typescript-codegen
+        run: npm install
+
+      - name: Build generated client
+        working-directory: build/smithy/typescript-client/typescript-codegen
+        run: npm run build
+
+      - name: Verify generated client
+        working-directory: build/smithy/typescript-client/typescript-codegen
+        run: |
+          echo "=== Package info ==="
+          node -e "const p = require('./package.json'); console.log(p.name, p.version)"
+          echo "=== Generated files ==="
+          ls -la src/ | head -20
+          echo "=== Commands ==="
+          ls src/commands/ | head -20
