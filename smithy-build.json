@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "sources": ["model"],
+  "maven": {
+    "dependencies": [
+      "software.amazon.smithy.typescript:smithy-typescript-codegen:0.51.0",
+      "software.amazon.smithy.typescript:smithy-aws-typescript-codegen:0.51.0"
+    ]
+  },
+  "projections": {
+    "typescript-client": {
+      "plugins": {
+        "typescript-codegen": {
+          "service": "com.amazon.connect.acxd.sdk#AgenticCXDesignerService",
+          "package": "amazon-connect-acxd-sdk",
+          "packageVersion": "0.1.0"
+        }
+      }
+    }
+  }
+}
