@@ -83,6 +83,10 @@ operation DeleteFlow {
 @length(min: 3, max: 64)
 string FlowId
 
+@pattern("^[A-Za-z.{}:]+$")
+@length(min: 3, max: 64)
+string RedirectTarget
+
 @pattern("^[ -~]*$")
 @length(max: 200)
 string FlowDescription
@@ -786,9 +790,9 @@ structure RedirectConfig {
     @required
     type: RedirectType
 
-    flowId: FlowId
+    flowId: RedirectTarget
 
-    nodeId: UUIDv4
+    nodeId: String
 
     pageName: String
 }
