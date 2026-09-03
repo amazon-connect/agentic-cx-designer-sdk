@@ -18,12 +18,15 @@
 const { randomUUID } = require('crypto');
 
 const SLOT_TYPE_ID = 'YesOrNo';
+// The slot's reference name within the flow (distinct from its type id above).
+// The user_choice node and its conditions reference the slot by this name.
+const SLOT_NAME = 'YesNo';
 
 const WELCOME_MESSAGE =
   'Welcome to Cedar Ridge National Park! I can help with trails, permits, fees, wildlife safety, and park hours. What would you like to know?';
 
 const GEN_TEXT_PROMPT =
-  'You are the Cedar Ridge National Park visitor assistant. Rephrase the retrieved knowledge base answer into a warm, concise, encouraging reply for a visitor, in one to three sentences. Keep all facts (hours, prices, permit rules, safety instructions) exactly as given - do not invent or change any details. If the answer suggests contacting a ranger, gently offer that option.';
+  'You are the Cedar Ridge National Park visitor assistant. Rephrase the retrieved knowledge base answer, which is stored in {KbArticle:NLX.Local}, into a warm, concise, encouraging reply for a visitor, in one to three sentences. Keep all facts (hours, prices, permit rules, safety instructions) exactly as given - do not invent or change any details. If the answer suggests contacting a ranger, gently offer that option.';
 
 const nodeStatusEq = (value) => ({
   left: { type: 'node_status' },
@@ -127,7 +130,7 @@ function buildNodes({ knowledgeBaseId, yesValueId, noValueId }) {
           nodeId: YES_NODE_ID,
           conditions: [
             {
-              left: { type: 'slot_value_id', name: SLOT_TYPE_ID },
+              left: { type: 'slot_value_id', name: SLOT_NAME },
               operator: 'eq',
               right: { type: 'constant_id', value: yesValueId },
             },
@@ -137,7 +140,7 @@ function buildNodes({ knowledgeBaseId, yesValueId, noValueId }) {
           nodeId: ESCALATE_NODE_ID,
           conditions: [
             {
-              left: { type: 'slot_value_id', name: SLOT_TYPE_ID },
+              left: { type: 'slot_value_id', name: SLOT_NAME },
               operator: 'eq',
               right: { type: 'constant_id', value: noValueId },
             },
@@ -145,7 +148,7 @@ function buildNodes({ knowledgeBaseId, yesValueId, noValueId }) {
         },
         {
           nodeId: END_NODE_ID,
-          conditions: [{ left: { type: 'slot', name: SLOT_TYPE_ID }, operator: 'not_exists' }],
+          conditions: [{ left: { type: 'slot', name: SLOT_NAME }, operator: 'not_exists' }],
         },
       ],
       messages: [
@@ -159,8 +162,8 @@ function buildNodes({ knowledgeBaseId, yesValueId, noValueId }) {
       metadata: {
         choice: {
           source: 'slotType',
-          slotTypeId: SLOT_TYPE_ID,
-          selectedChoiceLabel: SLOT_TYPE_ID,
+          slotTypeId: SLOT_NAME,
+          selectedChoiceLabel: SLOT_NAME,
           showChoices: false,
           choiceDisplayFormat: 'dropdown',
         },

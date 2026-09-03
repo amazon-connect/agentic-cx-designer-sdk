@@ -2,7 +2,7 @@
   "name": "acxd-example-scripts",
   "version": "0.1.0",
   "private": true,
-  "description": "Pre-manufactured example setups built on the amazon-connect-acxd-sdk. Each blueprint stands up a working ACXD application; scripts are idempotent (create-or-update), so re-running converges to the desired state.",
+  "description": "Pre-manufactured example setups built on the amazon-connect-acxd-sdk. Each blueprint stands up a working ACXD application; resource creation is create-or-fail, so a re-run never modifies existing resources.",
   "scripts": {
     "autocare:create": "node autocare-voice-assistant/create.js",
     "autocare:build-deploy": "node autocare-voice-assistant/build-deploy.js",

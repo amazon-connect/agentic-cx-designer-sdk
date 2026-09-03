@@ -93,6 +93,7 @@ function buildNodes({ dataRequestId }) {
       ],
       dataRequests: [
         {
+          dataRequestId,
           name: dataRequestId,
           urlParams: { orderNumber: '{orderNumber:NLX.Context}' },
           headers: {},
@@ -118,11 +119,7 @@ function buildNodes({ dataRequestId }) {
         generativeText: {
           name: 'OutputSummary',
           prompt: GEN_TEXT_PROMPT,
-          // LLM binding - without an integration/model the node errors with
-          // IntegrationNotFound. Use the NLX-managed Bedrock model.
           modelType: 'amazon-nova-2-lite',
-          integrationType: 'llmManaged',
-          integrationName: 'NLX',
           temperature: 0.5,
           maxTokens: 4000,
         },
