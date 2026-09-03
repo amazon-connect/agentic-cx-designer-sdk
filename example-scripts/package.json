@@ -1,0 +1,28 @@
+{
+  "name": "acxd-example-scripts",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pre-manufactured example setups built on the amazon-connect-acxd-sdk. Each blueprint stands up a working ACXD application; resource creation is create-or-fail, so a re-run never modifies existing resources.",
+  "scripts": {
+    "autocare:create": "node autocare-voice-assistant/create.js",
+    "autocare:build-deploy": "node autocare-voice-assistant/build-deploy.js",
+    "autocare:kb": "node autocare-voice-assistant/kb.js",
+    "autocare:flow": "node autocare-voice-assistant/flow.js",
+    "autocare:guardrail": "node autocare-voice-assistant/guardrail.js",
+    "autocare:app": "node autocare-voice-assistant/application.js",
+    "trailhead:create": "node trailhead-assistant/create.js",
+    "trailhead:build-deploy": "node trailhead-assistant/build-deploy.js",
+    "trailhead:kb": "node trailhead-assistant/kb.js",
+    "trailhead:slot": "node trailhead-assistant/slot-type.js",
+    "trailhead:flow": "node trailhead-assistant/flow.js",
+    "trailhead:app": "node trailhead-assistant/application.js",
+    "order:create": "node order-lookup-assistant/create.js",
+    "order:build-deploy": "node order-lookup-assistant/build-deploy.js",
+    "order:datarequest": "node order-lookup-assistant/data-request.js",
+    "order:flow": "node order-lookup-assistant/flow.js",
+    "order:app": "node order-lookup-assistant/application.js"
+  },
+  "dependencies": {
+    "amazon-connect-acxd-sdk": "^0.1.0"
+  }
+}
