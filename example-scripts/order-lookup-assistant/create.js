@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * OrderLookup — one-command create.
+ * OrderLookup - one-command create.
  *
  * Stands up an order-lookup assistant from scratch, in order:
  *   1. Data request (external webhook to the DummyJSON demo API)

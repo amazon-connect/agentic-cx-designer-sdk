@@ -13,18 +13,12 @@
  * context variable (state modification); the data_request node reads it via
  * urlParams (`{orderNumber:NLX.Context}`) into the webhook URL path.
  *
- * Node ids are fixed so re-running is a clean update. The `dataRequestId` is
- * injected so the flow references the OrderLookup data request.
+ * Node ids are generated fresh on each build (they only need to be unique
+ * within the flow). The `dataRequestId` is injected so the flow references the
+ * OrderLookup data request.
  */
 
-const START_NODE_ID = 'b638bc78-0001-4001-8001-000000000001';
-const USER_INPUT_NODE_ID = 'c942fe65-0002-4002-8002-000000000002';
-const DATA_REQUEST_NODE_ID = '254d0e75-0003-4003-8003-000000000003';
-const GEN_TEXT_NODE_ID = '212557c4-0004-4004-8004-000000000004';
-const SUMMARY_MSG_NODE_ID = '71c04147-0005-4005-8005-000000000005';
-const NOT_FOUND_NODE_ID = 'e751d61d-0006-4006-8006-000000000006';
-const ERROR_NODE_ID = '323f8ed8-0007-4007-8007-000000000007';
-const TERMINATE_NODE_ID = 'fdd04a77-0008-4008-8008-000000000008';
+const { randomUUID } = require('crypto');
 
 const WELCOME_MESSAGE =
   "Welcome to order lookup! What's your order number? (Enter a number between 1 and 50.)";
@@ -50,6 +44,15 @@ const nodeStatusEq = (value) => ({
  */
 function buildNodes({ dataRequestId }) {
   if (!dataRequestId) throw new Error('buildNodes: dataRequestId is required');
+
+  const START_NODE_ID = randomUUID();
+  const USER_INPUT_NODE_ID = randomUUID();
+  const DATA_REQUEST_NODE_ID = randomUUID();
+  const GEN_TEXT_NODE_ID = randomUUID();
+  const SUMMARY_MSG_NODE_ID = randomUUID();
+  const NOT_FOUND_NODE_ID = randomUUID();
+  const ERROR_NODE_ID = randomUUID();
+  const TERMINATE_NODE_ID = randomUUID();
 
   return {
     [START_NODE_ID]: {
@@ -115,7 +118,7 @@ function buildNodes({ dataRequestId }) {
         generativeText: {
           name: 'OutputSummary',
           prompt: GEN_TEXT_PROMPT,
-          // LLM binding — without an integration/model the node errors with
+          // LLM binding - without an integration/model the node errors with
           // IntegrationNotFound. Use the NLX-managed Bedrock model.
           modelType: 'amazon-nova-2-lite',
           integrationType: 'llmManaged',

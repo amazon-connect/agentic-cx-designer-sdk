@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * OrderLookup — build + deploy step.
+ * OrderLookup - build + deploy step.
  *
  * Follow-up to `npm run order:create`. Builds the application, waits for the
  * build to finish, then deploys it (create-or-update deployment in place).
@@ -10,7 +10,7 @@
  */
 
 const { makeClient, sdk } = require('../lib/client');
-const { findApplicationByName, ensureDeployment } = require('../lib/ensure');
+const { findApplicationByName, deployApplication } = require('../lib/ensure');
 const { APPLICATION } = require('./application');
 
 const DEPLOY_ENVIRONMENT = 'development';
@@ -56,21 +56,21 @@ async function waitForBuild(client, applicationId, buildId) {
         description: 'OrderLookup build (via example scripts).',
       }),
     );
-    console.log(`  build ${build.buildId} — status ${build.status}`);
+    console.log(`  build ${build.buildId} - status ${build.status}`);
 
     console.log('  waiting for build to finish ...');
     await waitForBuild(client, app.applicationId, build.buildId);
-    console.log(`  build ${build.buildId} — status ${BUILD_SUCCESS}`);
+    console.log(`  build ${build.buildId} - status ${BUILD_SUCCESS}`);
 
     console.log(`Deploying build to "${DEPLOY_ENVIRONMENT}" ...`);
-    const deployment = await ensureDeployment(client, {
+    const deployment = await deployApplication(client, {
       applicationId: app.applicationId,
       buildId: build.buildId,
       environment: DEPLOY_ENVIRONMENT,
       languageCodes: DEPLOY_LANGUAGE_CODES,
     });
     console.log(
-      `  ${deployment.action.toUpperCase()} — deployment ${deployment.deploymentId} — status ${deployment.deploymentStatus}`,
+      `  ${deployment.action.toUpperCase()} - deployment ${deployment.deploymentId} - status ${deployment.deploymentStatus}`,
     );
 
     console.log('\nBuild + deploy complete.');

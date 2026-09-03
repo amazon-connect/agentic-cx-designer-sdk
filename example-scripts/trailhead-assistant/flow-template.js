@@ -11,18 +11,11 @@
  * terminate node. Runtime-only fields (saveId, timestamps) are omitted.
  *
  * The knowledge base id and the YesNo slot value ids are injected at build
- * time. Node ids are fixed so re-running is a clean update.
+ * time. Node ids are generated fresh on each build (they only need to be unique
+ * within the flow).
  */
 
-const START_NODE_ID = 'fcb0fef2-4ffa-407f-9791-57a676c0231b';
-const USER_INPUT_NODE_ID = '7506f314-4343-4e0d-b56c-9a1564e8cd73';
-const KB_NODE_ID = 'db2369ec-19aa-4c66-b65f-c571608d3262';
-const GEN_TEXT_NODE_ID = '6653f9d9-2e6f-4239-834f-85c5904b4091';
-const USER_CHOICE_NODE_ID = '48af7ce2-c53e-4644-a56f-51159a1674a8';
-const YES_NODE_ID = '30ebe703-2da9-4d76-a81a-56c0d503bfe4';
-const ESCALATE_NODE_ID = '42e08a4b-c1df-48e7-a7c1-f2efdffd2f7f';
-const END_NODE_ID = 'a948a8f5-6d59-41e5-84f4-de5335e495d7';
-const FALLBACK_END_NODE_ID = '71d1a047-d9da-4da7-9c6b-bf715edc39fb';
+const { randomUUID } = require('crypto');
 
 const SLOT_TYPE_ID = 'YesOrNo';
 
@@ -45,6 +38,18 @@ const nodeStatusEq = (value) => ({
 function buildNodes({ knowledgeBaseId, yesValueId, noValueId }) {
   if (!knowledgeBaseId) throw new Error('buildNodes: knowledgeBaseId is required');
   if (!yesValueId || !noValueId) throw new Error('buildNodes: yesValueId and noValueId are required');
+
+  // Fresh node ids per build. Node ids only need to be unique within the flow,
+  // so a new set each run is fine (the flow structure is identical).
+  const START_NODE_ID = randomUUID();
+  const USER_INPUT_NODE_ID = randomUUID();
+  const KB_NODE_ID = randomUUID();
+  const GEN_TEXT_NODE_ID = randomUUID();
+  const USER_CHOICE_NODE_ID = randomUUID();
+  const YES_NODE_ID = randomUUID();
+  const ESCALATE_NODE_ID = randomUUID();
+  const END_NODE_ID = randomUUID();
+  const FALLBACK_END_NODE_ID = randomUUID();
 
   return {
     [START_NODE_ID]: {

@@ -7,15 +7,17 @@ with a single command — a knowledge base, a flow, and an application, built an
 deployed — so you have something real to start from instead of a blank
 workspace.
 
-Every step is **idempotent** (create-or-update). Re-running an example
-converges your workspace to the desired state instead of creating duplicates,
-so it is safe to run repeatedly.
+Each example creates a fresh set of resources. If a resource it would create
+already exists (same name/id), the script stops with a clear "already exists"
+message rather than modifying it — so it never silently clobbers existing work.
+To start over, delete the resources (or the application) and run again.
 
 ## Prerequisites
 
 - **Node.js 18 or newer.**
 - An **ACXD workspace** and an **API key** for it (format `acxd_live_<prefix>.<secret>`).
-  API keys are created and managed in the Admin Hub.
+  See [Getting an API key](../README.md#getting-an-api-key) in the SDK README for
+  how to generate one.
 
 ## Setup
 
@@ -147,17 +149,18 @@ Individual steps are also available: `order:datarequest`, `order:flow`,
 .
 ├── lib/
 │   ├── client.js     # builds the SDK client from ACXD_* env vars
-│   └── ensure.js     # idempotent create-or-update helpers (application, flow,
-│                     #   knowledge base, articles, slot type, data request,
-│                     #   guardrail, deployment)
+│   └── ensure.js     # resource create helpers (application, flow, knowledge
+│                     #   base, articles, slot type, data request, guardrail)
+│                     #   plus deployApplication
 ├── autocare-voice-assistant/
 ├── trailhead-assistant/
 └── order-lookup-assistant/
 ```
 
-The shared `ensure.*` helpers implement the create-or-update pattern used by
-every example: look a resource up by its natural key (name / id), create it if
-it does not exist, otherwise update it in place.
+The shared helpers create each resource by its natural key (name / id) and fail
+with a clear error if it already exists, so a re-run never modifies existing
+resources. `deployApplication` is the exception: it uses the single deployment
+slot, creating it the first time and updating it on later deploys.
 
 ## Notes
 

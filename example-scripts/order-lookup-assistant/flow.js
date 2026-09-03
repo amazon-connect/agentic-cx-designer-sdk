@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * OrderLookup — flow step.
+ * OrderLookup - flow step.
  *
  * Creates or updates the "OrderLookup" flow, wired to the OrderLookup data
  * request.
@@ -11,7 +11,7 @@
  */
 
 const { makeClient } = require('../lib/client');
-const { ensureFlow } = require('../lib/ensure');
+const { createFlow } = require('../lib/ensure');
 const { ensureDataRequestStep } = require('./data-request');
 const { buildNodes } = require('./flow-template');
 
@@ -20,12 +20,12 @@ const FLOW_ID = 'OrderLookup';
 async function ensureFlowStep(client, { dataRequestId }) {
   console.log(`Flow "${FLOW_ID}":`);
   const nodes = buildNodes({ dataRequestId });
-  const flow = await ensureFlow(client, {
+  const flow = await createFlow(client, {
     flowId: FLOW_ID,
     description: 'Order lookup flow: ask for an order number, fetch it from an external API, summarize.',
     nodes,
   });
-  console.log(`  ${flow.action.toUpperCase()} — flowId=${flow.flowId}`);
+  console.log(`  CREATED - flowId=${flow.flowId}`);
   return { flowId: flow.flowId };
 }
 

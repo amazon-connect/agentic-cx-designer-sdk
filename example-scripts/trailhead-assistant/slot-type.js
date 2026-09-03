@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Trailhead Assistant — slot type step.
+ * Trailhead Assistant - slot type step.
  *
  * Ensures the YesOrNo slot type the user_choice node branches on, with fixed
  * value ids so the flow's conditions reference stable ids across workspaces.
@@ -11,7 +11,7 @@
  */
 
 const { makeClient } = require('../lib/client');
-const { ensureSlotType } = require('../lib/ensure');
+const { createSlotType } = require('../lib/ensure');
 
 const SLOT_TYPE_ID = 'YesOrNo';
 const YES_VALUE_ID = 'YesValueId';
@@ -19,14 +19,14 @@ const NO_VALUE_ID = 'NoValueId';
 
 async function ensureSlotTypeStep(client) {
   console.log(`Slot type "${SLOT_TYPE_ID}":`);
-  const result = await ensureSlotType(client, {
+  const result = await createSlotType(client, {
     slotTypeId: SLOT_TYPE_ID,
     values: [
       { value: 'Yes', valueId: YES_VALUE_ID, synonyms: ['yes', 'yeah', 'yep', 'sure'] },
       { value: 'No', valueId: NO_VALUE_ID, synonyms: ['no', 'nope', 'nah'] },
     ],
   });
-  console.log(`  ${result.action.toUpperCase()} — slotTypeId=${SLOT_TYPE_ID}`);
+  console.log(`  CREATED - slotTypeId=${SLOT_TYPE_ID}`);
   return { yesValueId: YES_VALUE_ID, noValueId: NO_VALUE_ID };
 }
 

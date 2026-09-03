@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Trailhead Assistant — knowledge base step.
+ * Trailhead Assistant - knowledge base step.
  *
  * Creates the Cedar Ridge FAQ knowledge base and reconciles its Q&A articles
  * (idempotent create-or-update). Attach the printed knowledgeBaseId to the
@@ -12,18 +12,18 @@
  */
 
 const { makeClient } = require('../lib/client');
-const { ensureKnowledgeBase, ensureArticle } = require('../lib/ensure');
+const { createKnowledgeBase, createArticle } = require('../lib/ensure');
 const { KNOWLEDGE_BASE, ARTICLES } = require('./kb-content');
 
 async function ensureKnowledgeBaseStep(client) {
   console.log(`Knowledge base "${KNOWLEDGE_BASE.name}":`);
-  const kb = await ensureKnowledgeBase(client, KNOWLEDGE_BASE);
-  console.log(`  ${kb.action.toUpperCase()} — knowledgeBaseId=${kb.knowledgeBaseId}`);
+  const kb = await createKnowledgeBase(client, KNOWLEDGE_BASE);
+  console.log(`  CREATED - knowledgeBaseId=${kb.knowledgeBaseId}`);
 
-  console.log(`  reconciling ${ARTICLES.length} article(s) ...`);
+  console.log(`  creating ${ARTICLES.length} article(s) ...`);
   for (const qa of ARTICLES) {
-    const res = await ensureArticle(client, kb.knowledgeBaseId, qa);
-    console.log(`    ${res.action.padEnd(7)} — "${qa.question}"`);
+    await createArticle(client, kb.knowledgeBaseId, qa);
+    console.log(`    created - "${qa.question}"`);
   }
   return { knowledgeBaseId: kb.knowledgeBaseId };
 }

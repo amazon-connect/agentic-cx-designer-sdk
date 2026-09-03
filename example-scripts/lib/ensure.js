@@ -1,15 +1,28 @@
 'use strict';
 
 /**
- * Idempotent "ensure" helpers shared by all blueprints.
+ * Resource creation helpers shared by all blueprints.
  *
- * The pattern, for every resource: look it up by its stable natural key
- * (here, the application name). If it does not exist, create it. If it does,
- * update it in place. Re-running a blueprint therefore converges to the
- * desired state instead of creating duplicates or erroring.
+ * Each blueprint provisions a fresh set of resources. These helpers create a
+ * resource and fail with a clear "already exists" error if a resource with the
+ * same natural key (name / id) is already present - so a re-run does not
+ * silently modify or clobber existing resources. To start over, delete the
+ * existing resources (or the application) and run again.
+ *
+ * Deployment is the one exception: an application/environment has a single
+ * deployment slot, so `deployApplication` creates it the first time and updates
+ * that same slot on subsequent deploys.
  */
 
 const { sdk } = require('./client');
+
+/** Error thrown when a resource already exists. */
+class AlreadyExistsError extends Error {
+  constructor(kind, key) {
+    super(`${kind} "${key}" already exists. Delete it (or the application) and run again to recreate.`);
+    this.name = 'AlreadyExistsError';
+  }
+}
 
 /**
  * Find an application in the workspace by name (paginating the list).
@@ -18,9 +31,7 @@ const { sdk } = require('./client');
 async function findApplicationByName(client, name) {
   let nextToken;
   do {
-    const res = await client.send(
-      new sdk.ListApplicationsCommand(nextToken ? { nextToken } : {})
-    );
+    const res = await client.send(new sdk.ListApplicationsCommand(nextToken ? { nextToken } : {}));
     const match = (res.items ?? []).find((a) => a.name === name);
     if (match) return match;
     nextToken = res.nextToken;
@@ -29,74 +40,41 @@ async function findApplicationByName(client, name) {
 }
 
 /**
- * Create-or-update an application by name.
- *
- * @param client  AgenticCXDesignerClient
+ * Create an application. Fails if one with the same name already exists.
  * @param desired { name, description?, flows?, settings? }
- * @returns { action: 'created' | 'updated', applicationId, response }
+ * @returns { applicationId }
  */
-async function ensureApplication(client, desired) {
+async function createApplication(client, desired) {
   const { name } = desired;
-  if (!name) throw new Error('ensureApplication: desired.name is required');
-
-  const existing = await findApplicationByName(client, name);
-
-  if (!existing) {
-    const response = await client.send(
-      new sdk.CreateApplicationCommand({
-        name: desired.name,
-        ...(desired.description !== undefined && { description: desired.description }),
-        ...(desired.flows !== undefined && { flows: desired.flows }),
-        ...(desired.settings !== undefined && { settings: desired.settings }),
-      })
-    );
-    return { action: 'created', applicationId: response.applicationId, response };
-  }
+  if (!name) throw new Error('createApplication: desired.name is required');
+  if (await findApplicationByName(client, name)) throw new AlreadyExistsError('Application', name);
 
   const response = await client.send(
-    new sdk.UpdateApplicationCommand({
-      applicationIdentifier: existing.applicationId,
-      ...(desired.name !== undefined && { name: desired.name }),
+    new sdk.CreateApplicationCommand({
+      name: desired.name,
       ...(desired.description !== undefined && { description: desired.description }),
       ...(desired.flows !== undefined && { flows: desired.flows }),
       ...(desired.settings !== undefined && { settings: desired.settings }),
-    })
+    }),
   );
-  return { action: 'updated', applicationId: existing.applicationId, response };
+  return { applicationId: response.applicationId };
 }
 
 /**
- * Find a knowledge base by name (paginating the list).
- * Returns the summary or undefined.
+ * Create a knowledge base. Fails if one with the same name already exists.
+ * @param desired { name, type?, description?, mainLanguageCode? }
+ * @returns { knowledgeBaseId }
  */
-async function findKnowledgeBaseByName(client, name) {
+async function createKnowledgeBase(client, desired) {
+  const { name } = desired;
+  if (!name) throw new Error('createKnowledgeBase: desired.name is required');
+
   let nextToken;
   do {
-    const res = await client.send(
-      new sdk.ListKnowledgeBasesCommand(nextToken ? { nextToken } : {})
-    );
-    const match = (res.items ?? []).find((k) => k.name === name);
-    if (match) return match;
+    const res = await client.send(new sdk.ListKnowledgeBasesCommand(nextToken ? { nextToken } : {}));
+    if ((res.items ?? []).some((k) => k.name === name)) throw new AlreadyExistsError('Knowledge base', name);
     nextToken = res.nextToken;
   } while (nextToken);
-  return undefined;
-}
-
-/**
- * Create a knowledge base if one with the same name does not already exist.
- * KBs have no fields we need to reconcile here, so an existing KB is reused
- * as-is (its articles are reconciled separately by ensureArticle).
- *
- * @returns { action: 'created' | 'exists', knowledgeBaseId }
- */
-async function ensureKnowledgeBase(client, desired) {
-  const { name } = desired;
-  if (!name) throw new Error('ensureKnowledgeBase: desired.name is required');
-
-  const existing = await findKnowledgeBaseByName(client, name);
-  if (existing) {
-    return { action: 'exists', knowledgeBaseId: existing.knowledgeBaseId };
-  }
 
   const response = await client.send(
     new sdk.CreateKnowledgeBaseCommand({
@@ -104,53 +82,23 @@ async function ensureKnowledgeBase(client, desired) {
       type: desired.type ?? 'articles',
       ...(desired.description !== undefined && { description: desired.description }),
       ...(desired.mainLanguageCode !== undefined && { mainLanguageCode: desired.mainLanguageCode }),
-    })
+    }),
   );
-  return { action: 'created', knowledgeBaseId: response.knowledgeBaseId };
+  return { knowledgeBaseId: response.knowledgeBaseId };
 }
 
 /**
- * Create-or-update a single Q&A article, keyed on the question text.
- *
- * @param client
- * @param knowledgeBaseId
+ * Create a single Q&A article in a knowledge base.
  * @param qa { question: string, answer: string }
- * @returns { action: 'created' | 'updated', articleId }
+ * @returns { articleId }
  */
-async function ensureArticle(client, knowledgeBaseId, qa) {
-  // Find an existing article with the same question text.
-  let existing;
-  let nextToken;
-  do {
-    const res = await client.send(
-      new sdk.ListKnowledgeBaseArticlesCommand(
-        nextToken ? { knowledgeBaseId, nextToken } : { knowledgeBaseId }
-      )
-    );
-    existing = (res.items ?? []).find((a) => a.question?.text === qa.question);
-    if (existing) break;
-    nextToken = res.nextToken;
-  } while (nextToken);
-
+async function createArticle(client, knowledgeBaseId, qa) {
   const question = { text: qa.question };
   const responses = [{ type: 'text', body: qa.answer }];
-
-  if (!existing) {
-    const response = await client.send(
-      new sdk.CreateKnowledgeBaseArticleCommand({ knowledgeBaseId, question, responses })
-    );
-    return { action: 'created', articleId: response.articleId };
-  }
-
-  await client.send(
-    new sdk.UpdateKnowledgeBaseArticleCommand({
-      knowledgeBaseId,
-      articleId: existing.articleId,
-      question,
-      responses,
-    })
+  const response = await client.send(
+    new sdk.CreateKnowledgeBaseArticleCommand({ knowledgeBaseId, question, responses }),
   );
-  return { action: 'updated', articleId: existing.articleId };
+  return { articleId: response.articleId };
 }
 
 /**
@@ -159,9 +107,7 @@ async function ensureArticle(client, knowledgeBaseId, qa) {
 async function findFlowById(client, flowId) {
   let nextToken;
   do {
-    const res = await client.send(
-      new sdk.ListFlowsCommand(nextToken ? { nextToken } : {})
-    );
+    const res = await client.send(new sdk.ListFlowsCommand(nextToken ? { nextToken } : {}));
     const match = (res.items ?? []).find((f) => f.flowId === flowId);
     if (match) return match;
     nextToken = res.nextToken;
@@ -170,68 +116,123 @@ async function findFlowById(client, flowId) {
 }
 
 /**
- * Create-or-update a flow, keyed on flowId (the name).
- *
- * @param client
- * @param desired { flowId, nodes, description?, mainLanguageCode?, languageCodes?, utterances? }
- * @returns { action: 'created' | 'updated', flowId }
+ * Create a flow. Fails if one with the same flowId (name) already exists.
+ * @param desired { flowId, nodes, description?, mainLanguageCode?, languageCodes?, utterances?, slotTypes? }
+ * @returns { flowId }
  */
-async function ensureFlow(client, desired) {
+async function createFlow(client, desired) {
   const { flowId, nodes } = desired;
-  if (!flowId) throw new Error('ensureFlow: desired.flowId is required');
-  if (!nodes) throw new Error('ensureFlow: desired.nodes is required');
+  if (!flowId) throw new Error('createFlow: desired.flowId is required');
+  if (!nodes) throw new Error('createFlow: desired.nodes is required');
+  if (await findFlowById(client, flowId)) throw new AlreadyExistsError('Flow', flowId);
 
-  const description = desired.description ?? 'Agentic Voice starter flow.';
   const mainLanguageCode = desired.mainLanguageCode ?? 'en-US';
-  const languageCodes = desired.languageCodes ?? [mainLanguageCode];
-  const utterances = desired.utterances ?? [];
-  const slotTypes = desired.slotTypes ?? [];
-
-  const existing = await findFlowById(client, flowId);
-
-  if (!existing) {
-    await client.send(
-      new sdk.CreateFlowCommand({
-        flowId,
-        utterances,
-        description,
-        untrained: true,
-        mainLanguageCode,
-        languageCodes,
-        slotTypes,
-        nodes,
-      })
-    );
-    return { action: 'created', flowId };
-  }
-
   await client.send(
-    new sdk.UpdateFlowCommand({
-      flowIdentifier: flowId,
-      utterances,
-      description,
+    new sdk.CreateFlowCommand({
+      flowId,
+      utterances: desired.utterances ?? [],
+      description: desired.description ?? 'Example flow.',
+      untrained: true,
       mainLanguageCode,
-      languageCodes,
-      slotTypes,
+      languageCodes: desired.languageCodes ?? [mainLanguageCode],
+      slotTypes: desired.slotTypes ?? [],
       nodes,
-    })
+    }),
   );
-  return { action: 'updated', flowId };
+  return { flowId };
 }
 
 /**
- * Create-or-update the deployment for an environment.
+ * Create a slot type. Fails if one with the same id already exists.
+ * @param desired { slotTypeId, values: [{ value, valueId }], description? }
+ * @returns { slotTypeId }
+ */
+async function createSlotType(client, desired) {
+  const { slotTypeId } = desired;
+  if (!slotTypeId) throw new Error('createSlotType: desired.slotTypeId is required');
+
+  let nextToken;
+  do {
+    const res = await client.send(new sdk.ListSlotTypesCommand(nextToken ? { nextToken } : {}));
+    if ((res.items ?? []).some((s) => s.slotTypeId === slotTypeId)) throw new AlreadyExistsError('Slot type', slotTypeId);
+    nextToken = res.nextToken;
+  } while (nextToken);
+
+  await client.send(
+    new sdk.CreateSlotTypeCommand({
+      slotTypeId,
+      values: desired.values,
+      ...(desired.description !== undefined && { description: desired.description }),
+    }),
+  );
+  return { slotTypeId };
+}
+
+/**
+ * Create a data request (webhook). Fails if one with the same id already exists.
+ * @param desired { dataRequestId, type, webhook, description? }
+ * @returns { dataRequestId }
+ */
+async function createDataRequest(client, desired) {
+  const { dataRequestId } = desired;
+  if (!dataRequestId) throw new Error('createDataRequest: desired.dataRequestId is required');
+
+  let nextToken;
+  do {
+    const res = await client.send(new sdk.ListDataRequestsCommand(nextToken ? { nextToken } : {}));
+    if ((res.items ?? []).some((d) => d.dataRequestId === dataRequestId)) throw new AlreadyExistsError('Data request', dataRequestId);
+    nextToken = res.nextToken;
+  } while (nextToken);
+
+  await client.send(
+    new sdk.CreateDataRequestCommand({
+      dataRequestId,
+      type: desired.type,
+      webhook: desired.webhook,
+      ...(desired.description !== undefined && { description: desired.description }),
+    }),
+  );
+  return { dataRequestId };
+}
+
+/**
+ * Create a guardrail. Fails if one with the same name already exists.
+ * @param desired { name, trigger, rules, description?, active? }
+ * @returns { guardrailId }
+ */
+async function createGuardrail(client, desired) {
+  const { name } = desired;
+  if (!name) throw new Error('createGuardrail: desired.name is required');
+
+  let nextToken;
+  do {
+    const res = await client.send(new sdk.ListGuardrailsCommand(nextToken ? { nextToken } : {}));
+    if ((res.items ?? []).some((g) => g.name === name)) throw new AlreadyExistsError('Guardrail', name);
+    nextToken = res.nextToken;
+  } while (nextToken);
+
+  const res = await client.send(
+    new sdk.CreateGuardrailCommand({
+      name: desired.name,
+      trigger: desired.trigger,
+      rules: desired.rules,
+      ...(desired.description !== undefined && { description: desired.description }),
+      ...(desired.active !== undefined && { active: desired.active }),
+    }),
+  );
+  return { guardrailId: res.guardrailId };
+}
+
+/**
+ * Deploy an application build. An application/environment has a single
+ * deployment slot: this creates it the first time and updates that same slot on
+ * subsequent deploys (redeploy in place). This is intentionally not create-only,
+ * since re-deploying newer builds to the existing slot is the normal workflow.
  *
- * An application/environment has a single deployment slot. The first deploy
- * creates it; subsequent deploys update that same slot to point at a new
- * build (redeploy in place) rather than creating another — which the backend
- * rejects with a limit error.
- *
- * @param client
  * @param opts { applicationId, buildId, environment, languageCodes }
  * @returns { action: 'created' | 'updated', deploymentId, deploymentStatus }
  */
-async function ensureDeployment(client, { applicationId, buildId, environment, languageCodes }) {
+async function deployApplication(client, { applicationId, buildId, environment, languageCodes }) {
   const list = await client.send(
     new sdk.ListApplicationDeploymentsCommand({ applicationIdentifier: applicationId }),
   );
@@ -243,7 +244,7 @@ async function ensureDeployment(client, { applicationId, buildId, environment, l
         applicationIdentifier: applicationId,
         buildIdentifier: buildId,
         environment,
-        description: 'Agentic Voice starter deployment (via example scripts).',
+        description: 'Example application deployment (via example scripts).',
       }),
     );
     return { action: 'created', deploymentId: res.deploymentId, deploymentStatus: res.deploymentStatus };
@@ -256,137 +257,22 @@ async function ensureDeployment(client, { applicationId, buildId, environment, l
       buildIdentifier: buildId,
       environment,
       languageCodes,
-      description: 'Agentic Voice starter deployment (via example scripts).',
+      description: 'Example application deployment (via example scripts).',
     }),
   );
   return { action: 'updated', deploymentId: existing.deploymentId, deploymentStatus: res.deploymentStatus };
 }
 
-/**
- * Create-or-update a slot type by id, with caller-provided value ids so the
- * ids are stable across workspaces (the flow's user_choice conditions can then
- * reference fixed value ids).
- *
- * @param client
- * @param desired { slotTypeId, values: [{ value, valueId }], description? }
- * @returns { action: 'created' | 'updated', slotTypeId }
- */
-async function ensureSlotType(client, desired) {
-  const { slotTypeId } = desired;
-  if (!slotTypeId) throw new Error('ensureSlotType: desired.slotTypeId is required');
-
-  let existing;
-  let nextToken;
-  do {
-    const res = await client.send(new sdk.ListSlotTypesCommand(nextToken ? { nextToken } : {}));
-    existing = (res.items ?? []).find((s) => s.slotTypeId === slotTypeId);
-    if (existing) break;
-    nextToken = res.nextToken;
-  } while (nextToken);
-
-  if (!existing) {
-    await client.send(
-      new sdk.CreateSlotTypeCommand({
-        slotTypeId,
-        values: desired.values,
-        ...(desired.description !== undefined && { description: desired.description }),
-      }),
-    );
-    return { action: 'created', slotTypeId };
-  }
-
-  await client.send(
-    new sdk.UpdateSlotTypeCommand({
-      slotTypeIdentifier: slotTypeId,
-      values: desired.values,
-      ...(desired.description !== undefined && { description: desired.description }),
-    }),
-  );
-  return { action: 'updated', slotTypeId };
-}
-
-/**
- * Create-or-update a data request (webhook) by id.
- *
- * @param client
- * @param desired { dataRequestId, type, webhook, description? }
- * @returns { action: 'created' | 'updated', dataRequestId }
- */
-async function ensureDataRequest(client, desired) {
-  const { dataRequestId } = desired;
-  if (!dataRequestId) throw new Error('ensureDataRequest: desired.dataRequestId is required');
-
-  let existing;
-  let nextToken;
-  do {
-    const res = await client.send(new sdk.ListDataRequestsCommand(nextToken ? { nextToken } : {}));
-    existing = (res.items ?? []).find((d) => d.dataRequestId === dataRequestId);
-    if (existing) break;
-    nextToken = res.nextToken;
-  } while (nextToken);
-
-  if (!existing) {
-    await client.send(
-      new sdk.CreateDataRequestCommand({
-        dataRequestId,
-        type: desired.type,
-        webhook: desired.webhook,
-        ...(desired.description !== undefined && { description: desired.description }),
-      }),
-    );
-    return { action: 'created', dataRequestId };
-  }
-
-  await client.send(
-    new sdk.UpdateDataRequestCommand({
-      dataRequestIdentifier: dataRequestId,
-      type: desired.type,
-      webhook: desired.webhook,
-      ...(desired.description !== undefined && { description: desired.description }),
-    }),
-  );
-  return { action: 'updated', dataRequestId };
-}
-
-/**
- * Create-or-update a guardrail by name.
- *
- * @param client
- * @param desired { name, trigger, rules, description?, active? }
- * @returns { action: 'created' | 'updated', guardrailId }
- */
-async function ensureGuardrail(client, desired) {
-  const { name } = desired;
-  if (!name) throw new Error('ensureGuardrail: desired.name is required');
-
-  let existing;
-  let nextToken;
-  do {
-    const res = await client.send(new sdk.ListGuardrailsCommand(nextToken ? { nextToken } : {}));
-    existing = (res.items ?? []).find((g) => g.name === name);
-    if (existing) break;
-    nextToken = res.nextToken;
-  } while (nextToken);
-
-  const body = {
-    name: desired.name,
-    trigger: desired.trigger,
-    rules: desired.rules,
-    ...(desired.description !== undefined && { description: desired.description }),
-    ...(desired.active !== undefined && { active: desired.active }),
-  };
-
-  if (!existing) {
-    const res = await client.send(new sdk.CreateGuardrailCommand(body));
-    return { action: 'created', guardrailId: res.guardrailId };
-  }
-
-  await client.send(
-    new sdk.UpdateGuardrailCommand({ guardrailIdentifier: existing.guardrailId, ...body }),
-  );
-  return { action: 'updated', guardrailId: existing.guardrailId };
-}
-
-module.exports = { findApplicationByName, ensureApplication, ensureKnowledgeBase, ensureArticle, findFlowById, ensureFlow, ensureDeployment, ensureSlotType, ensureDataRequest, ensureGuardrail };
-
-
+module.exports = {
+  AlreadyExistsError,
+  findApplicationByName,
+  createApplication,
+  createKnowledgeBase,
+  createArticle,
+  findFlowById,
+  createFlow,
+  createSlotType,
+  createDataRequest,
+  createGuardrail,
+  deployApplication,
+};

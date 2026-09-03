@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Trailhead Assistant — flow step.
+ * Trailhead Assistant - flow step.
  *
  * Creates or updates the "TrailheadAssistant" flow, wired to the Cedar Ridge
  * knowledge base and the YesOrNo slot type value ids.
@@ -11,7 +11,7 @@
  */
 
 const { makeClient } = require('../lib/client');
-const { ensureKnowledgeBase, ensureFlow } = require('../lib/ensure');
+const { createKnowledgeBase, createFlow } = require('../lib/ensure');
 const { KNOWLEDGE_BASE } = require('./kb-content');
 const { ensureSlotTypeStep } = require('./slot-type');
 const { buildNodes } = require('./flow-template');
@@ -21,13 +21,13 @@ const FLOW_ID = 'TrailheadAssistant';
 async function ensureFlowStep(client, { knowledgeBaseId, yesValueId, noValueId }) {
   console.log(`Flow "${FLOW_ID}":`);
   const nodes = buildNodes({ knowledgeBaseId, yesValueId, noValueId });
-  const flow = await ensureFlow(client, {
+  const flow = await createFlow(client, {
     flowId: FLOW_ID,
     description: 'Trailhead assistant flow: ask, KB lookup, generative reply, escalate on no.',
     nodes,
     slotTypes: [{ name: 'YesNo', type: 'YesOrNo' }],
   });
-  console.log(`  ${flow.action.toUpperCase()} — flowId=${flow.flowId}`);
+  console.log(`  CREATED - flowId=${flow.flowId}`);
   return { flowId: flow.flowId };
 }
 
@@ -37,7 +37,7 @@ if (require.main === module) {
   (async () => {
     const client = makeClient();
     try {
-      const kb = await ensureKnowledgeBase(client, KNOWLEDGE_BASE);
+      const kb = await createKnowledgeBase(client, KNOWLEDGE_BASE);
       const { yesValueId, noValueId } = await ensureSlotTypeStep(client);
       await ensureFlowStep(client, { knowledgeBaseId: kb.knowledgeBaseId, yesValueId, noValueId });
       console.log('\nDone.');

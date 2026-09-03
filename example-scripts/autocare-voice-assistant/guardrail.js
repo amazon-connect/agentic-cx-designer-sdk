@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * AutoCare Voice Assistant — content-safety guardrail.
+ * AutoCare Voice Assistant - content-safety guardrail.
  *
  * Creates (idempotently) a guardrail applied to the caller's input, and returns
  * its id so the application step can attach it via settings.guardrails.
@@ -16,7 +16,7 @@
  */
 
 const { makeClient } = require('../lib/client');
-const { ensureGuardrail } = require('../lib/ensure');
+const { createGuardrail } = require('../lib/ensure');
 
 const GUARDRAIL = {
   name: 'content-safety',
@@ -58,8 +58,8 @@ const GUARDRAIL = {
 
 async function ensureGuardrailStep(client) {
   console.log(`Guardrail "${GUARDRAIL.name}":`);
-  const result = await ensureGuardrail(client, GUARDRAIL);
-  console.log(`  ${result.action.toUpperCase()} — guardrailId=${result.guardrailId}`);
+  const result = await createGuardrail(client, GUARDRAIL);
+  console.log(`  CREATED - guardrailId=${result.guardrailId}`);
   return { guardrailId: result.guardrailId };
 }
 

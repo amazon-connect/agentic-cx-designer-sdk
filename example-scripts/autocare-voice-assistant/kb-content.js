@@ -1,11 +1,11 @@
 'use strict';
 
 /**
- * AutoCare Auto Repair — knowledge base content for the AutoCare Voice Assistant.
+ * AutoCare Auto Repair - knowledge base content for the AutoCare Voice Assistant.
  *
  * Plain Q&A pairs. The deploy script creates a knowledge base and reconciles
  * one article per entry (create-or-update, keyed on the question text). Prices
- * and hours are illustrative demo values — edit freely.
+ * and hours are illustrative demo values - edit freely.
  */
 
 const KNOWLEDGE_BASE = {

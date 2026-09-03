@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * AutoCare Voice Assistant — flow step.
+ * AutoCare Voice Assistant - flow step.
  *
  * Creates or updates the "AutoCareAssistant" flow (start ->
  * generative_journey -> terminate) with the generative node wired to the
@@ -12,7 +12,7 @@
  */
 
 const { makeClient } = require('../lib/client');
-const { ensureKnowledgeBase, ensureFlow } = require('../lib/ensure');
+const { createKnowledgeBase, createFlow } = require('../lib/ensure');
 const { KNOWLEDGE_BASE } = require('./kb-content');
 const { buildNodes } = require('./flow-template');
 
@@ -22,23 +22,23 @@ const FLOW_ID = 'AutoCareAssistant';
 async function ensureFlowStep(client, { knowledgeBaseId }) {
   console.log(`Flow "${FLOW_ID}" (wired to knowledgeBaseId=${knowledgeBaseId}):`);
   const nodes = buildNodes({ knowledgeBaseId });
-  const flow = await ensureFlow(client, {
+  const flow = await createFlow(client, {
     flowId: FLOW_ID,
     description: 'AutoCare voice assistant flow: greet, answer via KB, terminate.',
     nodes,
   });
-  console.log(`  ${flow.action.toUpperCase()} — flowId=${flow.flowId}`);
+  console.log(`  CREATED - flowId=${flow.flowId}`);
   return { flowId: flow.flowId };
 }
 
 module.exports = { ensureFlowStep, FLOW_ID };
 
-// Standalone runner — ensures the KB first so the flow has something to wire to.
+// Standalone runner - ensures the KB first so the flow has something to wire to.
 if (require.main === module) {
   (async () => {
     const client = makeClient();
     try {
-      const kb = await ensureKnowledgeBase(client, KNOWLEDGE_BASE);
+      const kb = await createKnowledgeBase(client, KNOWLEDGE_BASE);
       await ensureFlowStep(client, { knowledgeBaseId: kb.knowledgeBaseId });
       console.log('\nDone.');
     } catch (e) {

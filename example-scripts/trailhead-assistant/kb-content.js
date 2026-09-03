@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Cedar Ridge National Park — knowledge base content for the Trailhead
+ * Cedar Ridge National Park - knowledge base content for the Trailhead
  * assistant. Plain Q&A pairs. All ASCII (the KB description and article
  * bodies reject non-ASCII such as the em-dash). Demo data for a fictional park.
  */

@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Trailhead Assistant — one-command create.
+ * Trailhead Assistant - one-command create.
  *
  * Stands up a complete Cedar Ridge visitor assistant from scratch, in order:
  *   1. Knowledge base + Q&A articles

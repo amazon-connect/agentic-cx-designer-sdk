@@ -11,7 +11,7 @@
 const fs = require('fs');
 const path = require('path');
 
-// Minimal .env loader — avoids adding a dependency. Only sets vars that are
+// Minimal .env loader - avoids adding a dependency. Only sets vars that are
 // not already present in process.env (real env always wins).
 function loadDotEnv() {
   const envPath = path.resolve(__dirname, '..', '.env');

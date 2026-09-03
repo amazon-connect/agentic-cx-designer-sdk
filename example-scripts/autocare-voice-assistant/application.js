@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * AutoCare Voice Assistant — application step.
+ * AutoCare Voice Assistant - application step.
  *
  * Creates or updates the application (idempotent) and attaches the starter
  * flow, setting it as the welcome (entry) flow. The flow must already exist.
@@ -11,7 +11,7 @@
  */
 
 const { makeClient } = require('../lib/client');
-const { ensureApplication } = require('../lib/ensure');
+const { createApplication } = require('../lib/ensure');
 const { FLOW_ID } = require('./flow');
 const { ensureGuardrailStep } = require('./guardrail');
 
@@ -41,8 +41,8 @@ async function ensureApplicationStep(client) {
   };
 
   console.log(`Application "${APPLICATION.name}":`);
-  const result = await ensureApplication(client, desired);
-  console.log(`  ${result.action.toUpperCase()} — applicationId=${result.applicationId}`);
+  const result = await createApplication(client, desired);
+  console.log(`  CREATED - applicationId=${result.applicationId}`);
   return { applicationId: result.applicationId };
 }
 

@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * OrderLookup — application step.
+ * OrderLookup - application step.
  *
  * Creates or updates the application with the flow attached as the welcome flow.
  *
@@ -10,7 +10,7 @@
  */
 
 const { makeClient } = require('../lib/client');
-const { ensureApplication } = require('../lib/ensure');
+const { createApplication } = require('../lib/ensure');
 const { FLOW_ID } = require('./flow');
 
 const APPLICATION = {
@@ -25,8 +25,8 @@ const APPLICATION = {
 
 async function ensureApplicationStep(client) {
   console.log(`Application "${APPLICATION.name}":`);
-  const result = await ensureApplication(client, APPLICATION);
-  console.log(`  ${result.action.toUpperCase()} — applicationId=${result.applicationId}`);
+  const result = await createApplication(client, APPLICATION);
+  console.log(`  CREATED - applicationId=${result.applicationId}`);
   return { applicationId: result.applicationId };
 }
 

@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * AutoCare Voice Assistant — one-command setup.
+ * AutoCare Voice Assistant - one-command setup.
  *
  * Stands up a complete, working ACXD "agentic voice" application from scratch,
  * in dependency order:
@@ -15,7 +15,7 @@
  *
  * Prerequisites: an ACXD workspace and an API key (set ACXD_API_KEY,
  * ACXD_WORKSPACE_ID, ACXD_REGION in .env). This script only provisions ACXD
- * resources — a Connect instance and phone number are set up separately.
+ * resources - a Connect instance and phone number are set up separately.
  *
  * Run with:  npm run autocare:create
  */

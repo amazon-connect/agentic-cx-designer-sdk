@@ -9,13 +9,11 @@
  * tool and prompt are injected at build time so the flow points at the KB we
  * create from the SDK.
  *
- * Node ids are fixed (not random) so re-running is a clean update rather than
- * producing a structurally-different graph each time.
+ * Node ids are generated fresh on each build (they only need to be unique
+ * within the flow).
  */
 
-const START_NODE_ID = '9deed177-41fa-4707-bec9-843b4df1b377';
-const JOURNEY_NODE_ID = '56dde33b-2ac5-4e28-999b-623634ffbed3';
-const TERMINATE_NODE_ID = 'ab770c0d-74a1-40fa-b88a-1162ffc276ff';
+const { randomUUID } = require('crypto');
 
 // Keep prompts ASCII: several ACXD validators (KB description, article bodies)
 // reject non-ASCII such as the em-dash (U+2014). Use hyphens.
@@ -38,6 +36,10 @@ const DEFAULT_PROMPT = [
  */
 function buildNodes({ knowledgeBaseId, prompt = DEFAULT_PROMPT }) {
   if (!knowledgeBaseId) throw new Error('buildNodes: knowledgeBaseId is required');
+
+  const START_NODE_ID = randomUUID();
+  const JOURNEY_NODE_ID = randomUUID();
+  const TERMINATE_NODE_ID = randomUUID();
 
   return {
     [START_NODE_ID]: {
