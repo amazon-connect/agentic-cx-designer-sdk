@@ -605,6 +605,8 @@ structure GenerativeTextConfig {
 
     prompt: String
 
+    modelType: GenerativeModelType
+
     groundingType: GroundingType
 
     timeout: Integer
