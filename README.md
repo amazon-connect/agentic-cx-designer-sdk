@@ -1,6 +1,7 @@
 # Agentic CX Designer SDK
 
-TypeScript SDK client for Amazon Connect Agentic CX Designer — provides programmatic access to workspace resources including applications, flows, knowledge bases, guardrails, and more.
+TypeScript SDK client for Amazon Connect Agentic CX Designer — provides programmatic access to workspace 
+resources including applications, flows, knowledge bases, guardrails, and more.
 
 ## Installation
 
@@ -259,9 +260,15 @@ try {
 }
 ```
 
+### Runnable example applications
+
+If you want to start with a pre-wired, working setup, the [`example-scripts/`](example-scripts/) directory has ready-to-run blueprints that
+stand up complete applications end-to-end. See the [example-scripts README](example-scripts/README.md) to get started.
+
 ## Architecture
 
-This repository contains the [Smithy](https://smithy.io) model that defines the Agentic CX Designer API. The TypeScript SDK client is generated from this model using [smithy-typescript-codegen](https://github.com/smithy-lang/smithy-typescript) and published to npm.
+This repository contains the [Smithy](https://smithy.io) model that defines the Agentic CX Designer API. The TypeScript SDK client is generated
+from this model using [smithy-typescript-codegen](https://github.com/smithy-lang/smithy-typescript) and published to npm.
 
 ```
 model/               <- Smithy model files (API source of truth)
