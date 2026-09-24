@@ -13,7 +13,13 @@
         "typescript-codegen": {
           "service": "com.amazon.connect.acxd.sdk#AgenticCXDesignerService",
           "package": "amazon-connect-acxd-sdk",
-          "packageVersion": "0.1.0"
+          "packageVersion": "0.1.0",
+          "packageJson": {
+            "repository": {
+              "type": "git",
+              "url": "https://github.com/amazon-connect/agentic-cx-designer-sdk"
+            }
+          }
         }
       }
     }
