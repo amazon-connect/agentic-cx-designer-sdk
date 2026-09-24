@@ -192,6 +192,9 @@ string ApplicationDescription
 @length(max: 16)
 string BuildVersion
 
+@length(min: 1, max: 64)
+string DeploymentAlias
+
 enum DeploymentEnvironment {
     DEVELOPMENT = "development"
     QA = "qa"
@@ -519,6 +522,8 @@ structure ApplicationDeployment {
     deploymentStatus: String
 
     environment: DeploymentEnvironment
+
+    deploymentAlias: DeploymentAlias
 
     languageCodes: LanguageCodeList
 

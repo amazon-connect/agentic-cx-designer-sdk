@@ -802,6 +802,7 @@ structure RedirectConfig {
 structure TransformConfig {
     input: Operand
     name: String
+    modelType: GenerativeModelType
     transformations: TransformationList
 }
 
