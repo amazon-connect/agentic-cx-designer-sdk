@@ -260,6 +260,45 @@ try {
 }
 ```
 
+### Copying resources between workspaces
+
+Most ids survive a move to another workspace untouched: flows, slot types, data
+requests, modalities and context variables are keyed by a name you chose. Knowledge
+bases and guardrails are not — the backend assigns those — and they are referenced
+from places as deep as a flow node's `metadata.knowledgeBase.knowledgeBaseId` or an
+application's `settings.defaultFlows`.
+
+`remapIds` substitutes the new ids into the payloads that still carry the old ones, so
+you don't have to know every place a reference can appear.
+
+```javascript
+import {
+  CreateApplicationCommand,
+  CreateFlowCommand,
+  CreateKnowledgeBaseCommand,
+  remapIds,
+} from "amazon-connect-acxd-sdk";
+
+// Keyed by the id each resource was exported with.
+const idMap = {};
+
+for (const knowledgeBase of knowledgeBases) {
+  const created = await client.send(new CreateKnowledgeBaseCommand(knowledgeBase));
+  idMap[knowledgeBase.knowledgeBaseId] = created.knowledgeBaseId;
+}
+
+// Anything that might name a knowledge base goes through `remapIds` first.
+for (const flow of flows) {
+  await client.send(new CreateFlowCommand(remapIds(flow, idMap)));
+}
+
+await client.send(new CreateApplicationCommand(remapIds(application, idMap)));
+```
+
+Ids are matched as whole strings, which is safe for the server-assigned UUIDs this is
+meant for. Don't use it to rename a resource keyed by a human-chosen name — `"Main"`
+would be rewritten inside any text that happens to contain it.
+
 ### Runnable example applications
 
 If you want to start with a pre-wired, working setup, the [`example-scripts/`](example-scripts/) directory has ready-to-run blueprints that

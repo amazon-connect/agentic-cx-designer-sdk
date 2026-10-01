@@ -9,7 +9,8 @@
 import { copyFileSync, readFileSync, appendFileSync, existsSync } from "node:fs";
 
 const GEN = "build/smithy/typescript-client/typescript-codegen/src";
-const REEXPORT = 'export { AgenticCXDesignerClient } from "./wrapper";';
+const REEXPORT =
+  'export { AgenticCXDesignerClient, remapIds } from "./wrapper";';
 
 const indexPath = `${GEN}/index.ts`;
 if (!existsSync(indexPath)) {
