@@ -271,11 +271,14 @@ structure WebhookEnvironment {
     headers: WebhookHeaderList
 }
 
+/// The name of a tool an MCP server offers.
+@pattern("^[A-Za-z0-9 _-]+$")
+@length(min: 1, max: 256)
+string McpToolName
+
 structure McpTool {
     @required
-    @pattern("^[A-Za-z0-9 _-]+$")
-    @length(min: 1, max: 256)
-    name: String
+    name: McpToolName
 
     enabled: Boolean
 
