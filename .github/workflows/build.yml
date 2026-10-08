@@ -31,6 +31,12 @@ jobs:
         with:
           node-version: 22
 
+      - name: Test hand-written overlay
+        run: |
+          npm install
+          npm run typecheck
+          npm test
+
       - name: Generate TypeScript client
         run: smithy build --config smithy-build.json
 
