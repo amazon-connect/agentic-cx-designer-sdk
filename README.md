@@ -299,6 +299,41 @@ Ids are matched as whole strings, which is safe for the server-assigned UUIDs th
 meant for. Don't use it to rename a resource keyed by a human-chosen name — `"Main"`
 would be rewritten inside any text that happens to contain it.
 
+### Exporting and importing a bundle
+
+`exportBundle` takes a resource and everything reachable from it; `importBundle` creates
+the lot in another workspace, in dependency order, remapping the ids the backend assigns
+on the way. The format is the one Agentic CX Designer Studio reads and writes, so a
+bundle moves between the two.
+
+```javascript
+import { exportBundle, importBundle } from "amazon-connect-acxd-sdk";
+
+const bundle = await exportBundle(source, {
+  resourceType: "applications",
+  resourceId: applicationId,
+});
+
+const { idMap, created } = await importBundle(target, bundle);
+```
+
+The dependency set comes from the validator's graph rather than from reading the
+resource's own settings, so something several hops away — a slot type used by a flow that
+another flow redirects to — comes along too.
+
+Some resources are named but not carried, and land in `bundle.unsupported` with a reason:
+a secret, because its value is never returned by the API; a handoff target, because
+another application is its own export; a live sync script reached from an application,
+for the same reason. Read it and tell whoever imports the bundle what they still have to
+set up by hand.
+
+`importBundle` throws on the first failure and does not roll back — what it already
+created stays. The `idMap` it returns is what you need to reconcile a partial run, so
+keep it.
+
+Accepted root types are `applications`, `flows`, `dataRequests`, `guardrails` and
+`liveSyncScripts`.
+
 ### Runnable example applications
 
 If you want to start with a pre-wired, working setup, the [`example-scripts/`](example-scripts/) directory has ready-to-run blueprints that
