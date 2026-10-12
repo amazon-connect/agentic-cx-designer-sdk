@@ -41,6 +41,13 @@ export interface ExportOptions {
   timeoutMs?: number;
   /** Gap between polls. Default 2 seconds. */
   pollIntervalMs?: number;
+  /**
+   * Idempotency token. Supply one to make this call safe to repeat: a retry
+   * answers the export the first call started instead of running a second one.
+   * The generated client fills one in per call if omitted, which does not
+   * survive a process restart — pass your own if you resume work.
+   */
+  clientToken?: string;
 }
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -68,12 +75,13 @@ export const exportBundle = async (
   root: { resourceType: CarriedResourceType; resourceId: string },
   options: ExportOptions = {},
 ): Promise<ResourceBundle> => {
-  const { timeoutMs = 600_000, pollIntervalMs = 2_000 } = options;
+  const { timeoutMs = 600_000, pollIntervalMs = 2_000, clientToken } = options;
 
   const started = await client.send(
     new ExportResourceCommand({
       resourceType: root.resourceType,
       resourceId: root.resourceId,
+      ...(clientToken === undefined ? {} : { clientToken }),
     }),
   );
 
