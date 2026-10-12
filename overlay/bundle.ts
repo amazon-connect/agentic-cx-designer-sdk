@@ -7,17 +7,6 @@
 // from `overlay/` — the format logic it builds on lives in bundle-format.ts,
 // which can.
 import {
-  GetApplicationCommand,
-  GetDataRequestCommand,
-  GetFlowCommand,
-  GetGuardrailCommand,
-  GetKnowledgeBaseCommand,
-  GetLiveSyncScriptCommand,
-  GetModalityCommand,
-  GetSlotTypeCommand,
-  ListAnalyticsTagsCommand,
-  ListContextVariablesCommand,
-  ListKnowledgeBaseArticlesCommand,
   CreateAnalyticsTagCommand,
   CreateApplicationCommand,
   CreateContextVariableCommand,
@@ -29,18 +18,15 @@ import {
   CreateLiveSyncScriptCommand,
   CreateModalityCommand,
   CreateSlotTypeCommand,
-  ValidateResourceCommand,
+  ExportResourceCommand,
+  GetDownloadCommand,
 } from "./index";
 import type { AgenticCXDesignerClient } from "./wrapper";
 import { remapIds } from "./wrapper";
 import {
   assertReadable,
-  classifyGraph,
-  collectPages,
-  emptyBundle,
-  ON_THE_WIRE,
-  selectFromList,
   type BundleResourceType,
+  type CarriedResourceType,
   type ResourceBundle,
 } from "./bundle-format";
 
@@ -50,12 +36,26 @@ export interface ImportOutcome {
   created: Partial<Record<BundleResourceType, Record<string, unknown>[]>>;
 }
 
+export interface ExportOptions {
+  /** How long to keep polling before giving up. Default 10 minutes. */
+  timeoutMs?: number;
+  /** Gap between polls. Default 2 seconds. */
+  pollIntervalMs?: number;
+}
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 /**
- * Export `root` together with every resource reachable from it.
+ * Export `resourceId` together with every resource reachable from it.
  *
- * The dependency set comes from the validator's graph rather than from reading
- * the resource's own settings, so something several hops away — a slot type used
- * by a flow that another flow redirects to — is carried too.
+ * The dependency set is computed by the service from its resource graph rather
+ * than from reading the resource's own settings, so something several hops away
+ * — a slot type used by a flow that another flow redirects to — is carried too.
+ *
+ * The export is asynchronous because a bundle for a large workspace exceeds what
+ * a single response can carry. This starts it, polls until the file is ready,
+ * and downloads it; `ConflictException` from GetDownload is the "still
+ * generating" signal and is what the polling loop waits on.
  *
  * @example
  * const bundle = await exportBundle(client, {
@@ -65,103 +65,51 @@ export interface ImportOutcome {
  */
 export const exportBundle = async (
   client: AgenticCXDesignerClient,
-  root: { resourceType: BundleResourceType; resourceId: string },
+  root: { resourceType: CarriedResourceType; resourceId: string },
+  options: ExportOptions = {},
 ): Promise<ResourceBundle> => {
-  const graph = await client.send(
-    new ValidateResourceCommand({
-      mode: "graph",
+  const { timeoutMs = 600_000, pollIntervalMs = 2_000 } = options;
+
+  const started = await client.send(
+    new ExportResourceCommand({
       resourceType: root.resourceType,
       resourceId: root.resourceId,
     }),
   );
 
-  // Back to the validator's names, which is what the format is written in. An
-  // unrecognised type keeps its own name so it lands in `unsupported` rather
-  // than becoming undefined.
-  const nodes = (graph.resources ?? []).map((node) => {
-    const sdkType = node.resource!.type as BundleResourceType;
-    return {
-      type: ON_THE_WIRE[sdkType] ?? String(sdkType),
-      id: node.resource!.id!,
-      name: node.resource!.name,
-    };
-  });
+  const downloadIdentifier = started.downloadIdentifier!;
+  const deadline = Date.now() + timeoutMs;
 
-  const { carried, unsupported } = classifyGraph(nodes, {
-    type: root.resourceType,
-    id: root.resourceId,
-  });
+  let url: string | undefined;
+  while (url === undefined) {
+    try {
+      const download = await client.send(
+        new GetDownloadCommand({ downloadIdentifier }),
+      );
+      url = download.url!;
+    } catch (error) {
+      // A 409 means the workflow has not finished writing the file. Anything
+      // else — the export failed, the id is unknown, the caller lost access —
+      // is not something more waiting will fix.
+      if ((error as { name?: string }).name !== "ConflictException") throw error;
+      if (Date.now() >= deadline) {
+        throw new Error(
+          `Export ${downloadIdentifier} was still generating after ${Math.round(timeoutMs / 1000)}s. It may still complete; poll GetDownload with that identifier.`,
+        );
+      }
+      await sleep(pollIntervalMs);
+    }
+  }
 
-  const bundle = emptyBundle({
-    type: root.resourceType,
-    id: root.resourceId,
-  });
-  bundle.unsupported = unsupported;
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(
+      `Failed to download export ${downloadIdentifier}: ${response.status} ${response.statusText}`,
+    );
+  }
 
-  const idsOf = (type: BundleResourceType) =>
-    (carried.get(type) ?? []).map((r) => r.id);
-
-  const fetchEach = async (
-    type: BundleResourceType,
-    get: (id: string) => Promise<unknown>,
-  ): Promise<Record<string, unknown>[]> =>
-    (await Promise.all(idsOf(type).map(get))) as Record<string, unknown>[];
-
-  bundle.applications = await fetchEach("applications", (id) =>
-    client.send(new GetApplicationCommand({ applicationIdentifier: id })),
-  );
-  bundle.flows = await fetchEach("flows", (id) =>
-    client.send(new GetFlowCommand({ flowIdentifier: id })),
-  );
-  bundle.liveSyncScripts = await fetchEach("liveSyncScripts", (id) =>
-    client.send(new GetLiveSyncScriptCommand({ liveSyncScriptIdentifier: id })),
-  );
-  bundle.slotTypes = await fetchEach("slotTypes", (id) =>
-    client.send(new GetSlotTypeCommand({ slotTypeIdentifier: id })),
-  );
-  bundle.dataRequests = await fetchEach("dataRequests", (id) =>
-    client.send(new GetDataRequestCommand({ dataRequestIdentifier: id })),
-  );
-  bundle.modalities = await fetchEach("modalities", (id) =>
-    client.send(new GetModalityCommand({ modalityIdentifier: id })),
-  );
-  bundle.guardrails = await fetchEach("guardrails", (id) =>
-    client.send(new GetGuardrailCommand({ guardrailIdentifier: id })),
-  );
-
-  // Knowledge bases carry their articles, which are a separate collection.
-  // Note the member is `knowledgeBaseId`, not the `...Identifier` every other
-  // resource uses.
-  bundle.knowledgeBases = await Promise.all(
-    idsOf("knowledgeBases").map(async (id) => {
-      const [knowledgeBase, articles] = await Promise.all([
-        client.send(new GetKnowledgeBaseCommand({ knowledgeBaseId: id })),
-        collectPages((nextToken) =>
-          client.send(
-            new ListKnowledgeBaseArticlesCommand({
-              knowledgeBaseId: id,
-              nextToken,
-            }),
-          ),
-        ),
-      ]);
-      return { ...knowledgeBase, articles } as Record<string, unknown>;
-    }),
-  );
-
-  // No GetContextVariable or GetAnalyticsTag operation exists, so these are
-  // listed and filtered rather than fetched by id.
-  bundle.contextVariables = await selectFromList(
-    idsOf("contextVariables"),
-    (nextToken) => client.send(new ListContextVariablesCommand({ nextToken })),
-    (item) => (item as { name?: string }).name,
-  );
-  bundle.analyticsTags = await selectFromList(
-    idsOf("analyticsTags"),
-    (nextToken) => client.send(new ListAnalyticsTagsCommand({ nextToken })),
-    (item) => (item as { name?: string }).name,
-  );
-
+  const bundle = (await response.json()) as ResourceBundle;
+  assertReadable(bundle);
   return bundle;
 };
 
