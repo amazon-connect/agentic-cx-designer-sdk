@@ -4,9 +4,6 @@ $version: "2"
 
 namespace com.amazon.connect.acxd.sdk
 
-// ============================================================================
-// Operations — Exports
-// ============================================================================
 /// Exports a resource together with everything it depends on, as a bundle
 /// Agentic CX Designer Studio can import. Asynchronous: poll GetDownload with
 /// the returned `downloadIdentifier` for a presigned URL.
@@ -21,9 +18,6 @@ operation ExportResource {
     ]
 }
 
-// ============================================================================
-// Custom Types — Exports
-// ============================================================================
 /// The resource kinds that can be an export root. Secrets are absent: a
 /// secret's value is never returned by the API.
 enum ExportableResourceType {
@@ -39,21 +33,27 @@ enum ExportableResourceType {
     GUARDRAILS = "guardrails"
 }
 
-// ============================================================================
-// Request/Response Structures — ExportResource
-// ============================================================================
+/// An opaque value identifying one export request, so a retry does not start a
+/// second export. Printable ASCII.
+@pattern("^[!-~]+$")
+@length(min: 1, max: 128)
+string IdempotencyToken
+
 structure ExportResourceRequest {
     @required
     resourceType: ExportableResourceType
 
     @required
     resourceId: String
+
+    /// Retrying with the same token answers the export the first call started,
+    /// rather than starting a second one. Honoured for as long as that
+    /// download's record lives. Generated for you if omitted.
+    @idempotencyToken
+    clientToken: IdempotencyToken
 }
 
 structure ExportResourceResponse {
     @required
-    downloadIdentifier: String
-
-    @required
-    status: String
+    downloadIdentifier: UUIDv4
 }
