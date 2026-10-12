@@ -80,7 +80,7 @@ export const exportBundle = async (
   const started = await client.send(
     new ExportResourceCommand({
       resourceType: root.resourceType,
-      resourceId: root.resourceId,
+      resourceIdentifier: root.resourceId,
       ...(clientToken === undefined ? {} : { clientToken }),
     }),
   );
