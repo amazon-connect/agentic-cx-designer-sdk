@@ -5,7 +5,9 @@
 // compiled or run from `overlay/`.
 //
 // The format is the one Agentic CX Designer Studio reads and writes, so a bundle
-// exported here imports there and vice versa.
+// exported here imports there and vice versa. Exporting is done by the service
+// (ExportResource), which owns the writing side of this format; what is left
+// here is what a client needs to read a bundle and import it.
 
 /** Bumped when the shape changes in a way an older reader would misread. */
 export const BUNDLE_FORMAT_VERSION = 2;
@@ -92,131 +94,10 @@ export type ResourceBundle = {
   unsupported: UnsupportedResource[];
 } & { [K in CarriedResourceType]: Record<string, unknown>[] };
 
-/**
- * Why a resource in the dependency graph is named but not carried. Matches the
- * wording Studio uses, so a bundle reads the same whichever side wrote it.
- */
-export const unsupportedReason = (wireType: string): string =>
-  ({
-    secret:
-      "A secret's value is never returned by the API, so only you can recreate it.",
-    bot: "Handoff targets are separate applications; export each one on its own.",
-    journey:
-      "Live sync scripts are exported on their own, from the live sync script itself.",
-    connectKnowledgeBase:
-      "This lives in your Connect instance, not in the workspace.",
-    dashboard:
-      "Dashboards are not part of an application and have no SDK operation.",
-    lifecycleHook: "Lifecycle hooks have no SDK operation yet.",
-    scenario: "Simulation scenarios have no SDK operation yet.",
-  })[wireType] ?? "This resource type cannot be created through the SDK.";
-
-/**
- * Applications and live sync scripts are only carried when they are the root.
- * Reached from somewhere else they are a handoff target or a separate script,
- * which is its own export.
- */
-export const carriedOnlyAsRoot = (type: BundleResourceType): boolean =>
-  type === "applications" || type === "liveSyncScripts";
-
-/** Secrets can never be carried: the API does not return their value. */
-export const neverCarried = (type: BundleResourceType): boolean =>
-  type === "secrets";
-
-export const emptyBundle = (root: {
-  type: BundleResourceType;
-  id: string;
-}): ResourceBundle => ({
-  formatVersion: BUNDLE_FORMAT_VERSION,
-  root: { type: ON_THE_WIRE[root.type], id: root.id },
-  applications: [],
-  flows: [],
-  liveSyncScripts: [],
-  slotTypes: [],
-  dataRequests: [],
-  modalities: [],
-  contextVariables: [],
-  analyticsTags: [],
-  guardrails: [],
-  knowledgeBases: [],
-  unsupported: [],
-});
-
 export const assertReadable = (bundle: { formatVersion: number }): void => {
   if (!READABLE_FORMAT_VERSIONS.includes(bundle.formatVersion)) {
     throw new Error(
       `Unreadable bundle: formatVersion ${bundle.formatVersion}, expected one of ${READABLE_FORMAT_VERSIONS.join(", ")}. Export it again from a current version.`,
     );
   }
-};
-
-/** Which graph nodes go into which collection, and which become `unsupported`. */
-export const classifyGraph = (
-  nodes: { type: string; id: string; name?: string }[],
-  root: { type: BundleResourceType; id: string },
-): {
-  carried: Map<BundleResourceType, { id: string; name?: string }[]>;
-  unsupported: UnsupportedResource[];
-} => {
-  const carried = new Map<BundleResourceType, { id: string; name?: string }[]>();
-  const unsupported: UnsupportedResource[] = [];
-
-  for (const node of nodes) {
-    const sdkType = FROM_THE_WIRE[node.type];
-    const isRoot = sdkType === root.type && node.id === root.id;
-
-    if (
-      sdkType === undefined ||
-      neverCarried(sdkType) ||
-      (carriedOnlyAsRoot(sdkType) && !isRoot)
-    ) {
-      unsupported.push({
-        type: node.type,
-        id: node.id,
-        name: node.name ?? node.id,
-        reason: unsupportedReason(node.type),
-      });
-      continue;
-    }
-
-    const existing = carried.get(sdkType) ?? [];
-    existing.push({ id: node.id, name: node.name });
-    carried.set(sdkType, existing);
-  }
-
-  return { carried, unsupported };
-};
-
-type Page = { items?: unknown[]; nextToken?: string };
-
-/** Reads every page of a paginated list operation. */
-export const collectPages = async (
-  page: (nextToken?: string) => Promise<Page>,
-): Promise<Record<string, unknown>[]> => {
-  const all: Record<string, unknown>[] = [];
-  let nextToken: string | undefined;
-  do {
-    const response = await page(nextToken);
-    all.push(...((response.items ?? []) as Record<string, unknown>[]));
-    nextToken = response.nextToken;
-  } while (nextToken);
-  return all;
-};
-
-/**
- * Picks wanted entries out of a list operation, for the two resource kinds with
- * no Get operation to fetch them by id.
- */
-export const selectFromList = async (
-  wanted: string[],
-  page: (nextToken?: string) => Promise<Page>,
-  keyOf: (item: unknown) => string | undefined,
-): Promise<Record<string, unknown>[]> => {
-  if (wanted.length === 0) return [];
-  const all = await collectPages(page);
-  const keys = new Set(wanted);
-  return all.filter((item) => {
-    const key = keyOf(item);
-    return key !== undefined && keys.has(key);
-  });
 };

@@ -317,9 +317,9 @@ const bundle = await exportBundle(source, {
 const { idMap, created } = await importBundle(target, bundle);
 ```
 
-The dependency set comes from the validator's graph rather than from reading the
-resource's own settings, so something several hops away — a slot type used by a flow that
-another flow redirects to — comes along too.
+The dependency set is computed by the service from its resource graph rather than from
+reading the resource's own settings, so something several hops away — a slot type used by
+a flow that another flow redirects to — comes along too.
 
 Some resources are named but not carried, and land in `bundle.unsupported` with a reason:
 a secret, because its value is never returned by the API; a handoff target, because
@@ -331,8 +331,38 @@ set up by hand.
 created stays. The `idMap` it returns is what you need to reconcile a partial run, so
 keep it.
 
-Accepted root types are `applications`, `flows`, `dataRequests`, `guardrails` and
-`liveSyncScripts`.
+Accepted root types are `applications`, `flows`, `slotTypes`, `dataRequests`,
+`contextVariables`, `analyticsTags`, `liveSyncScripts`, `knowledgeBases`, `modalities`
+and `guardrails`.
+
+#### Exporting without the helper
+
+The export itself is asynchronous: `ExportResource` starts it and returns a
+`downloadIdentifier`, and `GetDownload` answers a `ConflictException` until the file is
+ready, then a presigned URL. `exportBundle` is a wrapper around that loop — it polls
+every 2 seconds for up to 10 minutes, both adjustable:
+
+```javascript
+const bundle = await exportBundle(
+  source,
+  { resourceType: "applications", resourceId: applicationId },
+  { pollIntervalMs: 5_000, timeoutMs: 1_800_000 },
+);
+```
+
+Drive it yourself if you would rather not hold a connection open for the duration:
+
+```javascript
+const { downloadIdentifier } = await client.send(
+  new ExportResourceCommand({
+    resourceType: "applications",
+    resourceId: applicationId,
+  }),
+);
+
+// Later — ConflictException means it is still generating.
+const { url } = await client.send(new GetDownloadCommand({ downloadIdentifier }));
+```
 
 ### Runnable example applications
 

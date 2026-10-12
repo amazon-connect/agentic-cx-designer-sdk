@@ -13,8 +13,8 @@ const OVERLAY = ["wrapper.ts", "bundle-format.ts", "bundle.ts"];
 const REEXPORTS = [
   'export { AgenticCXDesignerClient, remapIds } from "./wrapper";',
   'export { exportBundle, importBundle } from "./bundle";',
-  'export type { ImportOutcome } from "./bundle";',
-  'export { unsupportedReason, classifyGraph, BUNDLE_FORMAT_VERSION } from "./bundle-format";',
+  'export type { ExportOptions, ImportOutcome } from "./bundle";',
+  'export { BUNDLE_FORMAT_VERSION, assertReadable } from "./bundle-format";',
   'export type { ResourceBundle, BundleResourceType, CarriedResourceType, UnsupportedResource } from "./bundle-format";',
 ];
 
