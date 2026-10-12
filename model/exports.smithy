@@ -44,7 +44,7 @@ structure ExportResourceRequest {
     resourceType: ExportableResourceType
 
     @required
-    resourceId: String
+    resourceIdentifier: String
 
     /// Retrying with the same token answers the export the first call started,
     /// rather than starting a second one. Honoured for as long as that
