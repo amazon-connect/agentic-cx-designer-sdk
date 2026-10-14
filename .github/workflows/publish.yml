@@ -40,6 +40,12 @@ jobs:
           npm install -g npm@11.5.1
           echo "Updated npm version: $(npm --version)"
 
+      - name: Test hand-written overlay
+        run: |
+          npm install
+          npm run typecheck
+          npm test
+
       - name: Generate TypeScript client
         run: smithy build --config smithy-build.json
 
