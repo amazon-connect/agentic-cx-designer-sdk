@@ -6,7 +6,7 @@ namespace com.amazon.connect.acxd.sdk
 
 /// Exports a resource together with everything it depends on, as a bundle
 /// Agentic CX Designer Studio can import. Asynchronous: poll GetDownload with
-/// the returned `downloadIdentifier` for a presigned URL.
+/// the returned `downloadId` for a presigned URL.
 @http(method: "POST", uri: "/sdk/exports", code: 202)
 operation ExportResource {
     input: ExportResourceRequest
@@ -56,5 +56,5 @@ structure ExportResourceRequest {
 
 structure ExportResourceResponse {
     @required
-    downloadIdentifier: UUIDv4
+    downloadId: UUIDv4
 }

@@ -338,7 +338,7 @@ and `guardrails`.
 #### Exporting without the helper
 
 The export itself is asynchronous: `ExportResource` starts it and returns a
-`downloadIdentifier`, and `GetDownload` answers a `ConflictException` until the file is
+`downloadId`, and `GetDownload` answers a `ConflictException` until the file is
 ready, then a presigned URL. `exportBundle` is a wrapper around that loop — it polls
 every 2 seconds for up to 10 minutes, both adjustable:
 
@@ -353,7 +353,7 @@ const bundle = await exportBundle(
 Drive it yourself if you would rather not hold a connection open for the duration:
 
 ```javascript
-const { downloadIdentifier } = await client.send(
+const { downloadId } = await client.send(
   new ExportResourceCommand({
     resourceType: "applications",
     resourceId: applicationId,
@@ -361,7 +361,7 @@ const { downloadIdentifier } = await client.send(
 );
 
 // Later — ConflictException means it is still generating.
-const { url } = await client.send(new GetDownloadCommand({ downloadIdentifier }));
+const { url } = await client.send(new GetDownloadCommand({ downloadIdentifier: downloadId }));
 ```
 
 ### Runnable example applications
