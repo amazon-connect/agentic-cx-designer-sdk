@@ -85,14 +85,14 @@ export const exportBundle = async (
     }),
   );
 
-  const downloadIdentifier = started.downloadIdentifier!;
+  const downloadId = started.downloadId!;
   const deadline = Date.now() + timeoutMs;
 
   let url: string | undefined;
   while (url === undefined) {
     try {
       const download = await client.send(
-        new GetDownloadCommand({ downloadIdentifier }),
+        new GetDownloadCommand({ downloadIdentifier: downloadId }),
       );
       url = download.url!;
     } catch (error) {
@@ -102,7 +102,7 @@ export const exportBundle = async (
       if ((error as { name?: string }).name !== "ConflictException") throw error;
       if (Date.now() >= deadline) {
         throw new Error(
-          `Export ${downloadIdentifier} was still generating after ${Math.round(timeoutMs / 1000)}s. It may still complete; poll GetDownload with that identifier.`,
+          `Export ${downloadId} was still generating after ${Math.round(timeoutMs / 1000)}s. It may still complete; poll GetDownload with that identifier.`,
         );
       }
       await sleep(pollIntervalMs);
@@ -112,7 +112,7 @@ export const exportBundle = async (
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(
-      `Failed to download export ${downloadIdentifier}: ${response.status} ${response.statusText}`,
+      `Failed to download export ${downloadId}: ${response.status} ${response.statusText}`,
     );
   }
 
