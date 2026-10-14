@@ -14,6 +14,7 @@ operation ExportResource {
     errors: [
         ValidationException
         ResourceNotFoundException
+        ConflictException
         InternalServerException
     ]
 }
