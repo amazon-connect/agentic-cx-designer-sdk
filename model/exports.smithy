@@ -4,9 +4,6 @@ $version: "2"
 
 namespace com.amazon.connect.acxd.sdk
 
-/// Exports a resource together with everything it depends on, as a bundle
-/// Agentic CX Designer Studio can import. Asynchronous: poll GetResourceExport
-/// with the returned `downloadId` for a presigned URL.
 @http(method: "POST", uri: "/sdk/exports", code: 202)
 operation ExportResource {
     input: ExportResourceRequest
@@ -19,8 +16,6 @@ operation ExportResource {
     ]
 }
 
-/// Retrieves a finished export as a presigned URL. Answers ConflictException
-/// while the bundle is still being generated.
 @http(method: "GET", uri: "/sdk/exports/{downloadId}")
 @readonly
 operation GetResourceExport {
@@ -34,8 +29,6 @@ operation GetResourceExport {
     ]
 }
 
-/// The resource kinds that can be an export root. Secrets are absent: a
-/// secret's value is never returned by the API.
 enum ExportableResourceType {
     APPLICATIONS = "applications"
     FLOWS = "flows"
@@ -49,8 +42,6 @@ enum ExportableResourceType {
     GUARDRAILS = "guardrails"
 }
 
-/// An opaque value identifying one export request, so a retry does not start a
-/// second export. Printable ASCII.
 @pattern("^[!-~]+$")
 @length(min: 1, max: 128)
 string IdempotencyToken
@@ -62,9 +53,6 @@ structure ExportResourceRequest {
     @required
     resourceIdentifier: String
 
-    /// Retrying with the same token answers the export the first call started,
-    /// rather than starting a second one. Honoured for as long as that
-    /// download's record lives. Generated for you if omitted.
     @idempotencyToken
     clientToken: IdempotencyToken
 }
