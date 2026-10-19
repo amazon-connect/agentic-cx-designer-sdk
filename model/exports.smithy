@@ -5,12 +5,27 @@ $version: "2"
 namespace com.amazon.connect.acxd.sdk
 
 /// Exports a resource together with everything it depends on, as a bundle
-/// Agentic CX Designer Studio can import. Asynchronous: poll GetDownload with
-/// the returned `downloadId` for a presigned URL.
+/// Agentic CX Designer Studio can import. Asynchronous: poll GetResourceExport
+/// with the returned `downloadId` for a presigned URL.
 @http(method: "POST", uri: "/sdk/exports", code: 202)
 operation ExportResource {
     input: ExportResourceRequest
     output: ExportResourceResponse
+    errors: [
+        ValidationException
+        ResourceNotFoundException
+        ConflictException
+        InternalServerException
+    ]
+}
+
+/// Retrieves a finished export as a presigned URL. Answers ConflictException
+/// while the bundle is still being generated.
+@http(method: "GET", uri: "/sdk/exports/{downloadId}")
+@readonly
+operation GetResourceExport {
+    input: GetResourceExportRequest
+    output: GetResourceExportResponse
     errors: [
         ValidationException
         ResourceNotFoundException
@@ -57,4 +72,15 @@ structure ExportResourceRequest {
 structure ExportResourceResponse {
     @required
     downloadId: UUIDv4
+}
+
+structure GetResourceExportRequest {
+    @required
+    @httpLabel
+    downloadId: UUIDv4
+}
+
+structure GetResourceExportResponse {
+    @required
+    url: String
 }

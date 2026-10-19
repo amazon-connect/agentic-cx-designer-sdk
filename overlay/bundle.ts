@@ -19,7 +19,7 @@ import {
   CreateModalityCommand,
   CreateSlotTypeCommand,
   ExportResourceCommand,
-  GetDownloadCommand,
+  GetResourceExportCommand,
 } from "./index";
 import type { AgenticCXDesignerClient } from "./wrapper";
 import { remapIds } from "./wrapper";
@@ -61,7 +61,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
  *
  * The export is asynchronous because a bundle for a large workspace exceeds what
  * a single response can carry. This starts it, polls until the file is ready,
- * and downloads it; `ConflictException` from GetDownload is the "still
+ * and downloads it; `ConflictException` from GetResourceExport is the "still
  * generating" signal and is what the polling loop waits on.
  *
  * @example
@@ -92,7 +92,7 @@ export const exportBundle = async (
   while (url === undefined) {
     try {
       const download = await client.send(
-        new GetDownloadCommand({ downloadIdentifier: downloadId }),
+        new GetResourceExportCommand({ downloadId }),
       );
       url = download.url!;
     } catch (error) {
@@ -102,7 +102,7 @@ export const exportBundle = async (
       if ((error as { name?: string }).name !== "ConflictException") throw error;
       if (Date.now() >= deadline) {
         throw new Error(
-          `Export ${downloadId} was still generating after ${Math.round(timeoutMs / 1000)}s. It may still complete; poll GetDownload with that identifier.`,
+          `Export ${downloadId} was still generating after ${Math.round(timeoutMs / 1000)}s. It may still complete; poll GetResourceExport with that id.`,
         );
       }
       await sleep(pollIntervalMs);
@@ -142,6 +142,17 @@ export const importBundle = async (
 ): Promise<ImportOutcome> => {
   assertReadable(bundle);
 
+  /**
+   * A bundle's payloads are opaque: whatever the service produced for each
+   * resource, carried verbatim. The generated command inputs require their own
+   * fields, which the compiler cannot verify of a record read from a file, so
+   * the courier has to assert here. A payload that is actually malformed comes
+   * back as a ValidationException from the service, which is where the real
+   * check belongs.
+   */
+  const asInput = <T>(payload: Record<string, unknown>): T =>
+    payload as unknown as T;
+
   const idMap: Record<string, string> = {};
   const created: ImportOutcome["created"] = {};
 
@@ -161,22 +172,22 @@ export const importBundle = async (
   // Keep this sequence in step with IMPORT_ORDER in bundle-format.ts, which the
   // tests assert against.
   await createAll("contextVariables", bundle.contextVariables, (p) =>
-    client.send(new CreateContextVariableCommand(p)),
+    client.send(new CreateContextVariableCommand(asInput(p))),
   );
   await createAll("analyticsTags", bundle.analyticsTags, (p) =>
-    client.send(new CreateAnalyticsTagCommand(p)),
+    client.send(new CreateAnalyticsTagCommand(asInput(p))),
   );
   await createAll("slotTypes", bundle.slotTypes, (p) =>
-    client.send(new CreateSlotTypeCommand(p)),
+    client.send(new CreateSlotTypeCommand(asInput(p))),
   );
   await createAll("dataRequests", bundle.dataRequests, (p) =>
-    client.send(new CreateDataRequestCommand(p)),
+    client.send(new CreateDataRequestCommand(asInput(p))),
   );
   await createAll("modalities", bundle.modalities, (p) =>
-    client.send(new CreateModalityCommand(p)),
+    client.send(new CreateModalityCommand(asInput(p))),
   );
   await createAll("liveSyncScripts", bundle.liveSyncScripts, (p) =>
-    client.send(new CreateLiveSyncScriptCommand(p)),
+    client.send(new CreateLiveSyncScriptCommand(asInput(p))),
   );
 
   // Knowledge bases and guardrails are assigned their ids here, so everything
@@ -187,7 +198,7 @@ export const importBundle = async (
       articles?: Record<string, unknown>[];
     };
     const result = (await client.send(
-      new CreateKnowledgeBaseCommand(knowledgeBase as Record<string, unknown>),
+      new CreateKnowledgeBaseCommand(asInput(knowledgeBase as Record<string, unknown>)),
     )) as { knowledgeBaseId?: string };
 
     const oldId = (knowledgeBase as { knowledgeBaseId?: string })
@@ -196,10 +207,9 @@ export const importBundle = async (
 
     for (const article of articles) {
       await client.send(
-        new CreateKnowledgeBaseArticleCommand({
-          ...article,
-          knowledgeBaseId: result.knowledgeBaseId,
-        }),
+        new CreateKnowledgeBaseArticleCommand(
+          asInput({ ...article, knowledgeBaseId: result.knowledgeBaseId }),
+        ),
       );
     }
     knowledgeBases.push(result as Record<string, unknown>);
@@ -209,7 +219,7 @@ export const importBundle = async (
   const guardrails: Record<string, unknown>[] = [];
   for (const guardrail of bundle.guardrails) {
     const result = (await client.send(
-      new CreateGuardrailCommand(guardrail),
+      new CreateGuardrailCommand(asInput(guardrail)),
     )) as { guardrailId?: string };
     const oldId = (guardrail as { guardrailId?: string }).guardrailId;
     if (oldId && result.guardrailId) idMap[oldId] = result.guardrailId;
@@ -218,10 +228,10 @@ export const importBundle = async (
   created.guardrails = guardrails;
 
   await createAll("flows", bundle.flows, (p) =>
-    client.send(new CreateFlowCommand(remapIds(p, idMap))),
+    client.send(new CreateFlowCommand(asInput(remapIds(p, idMap)))),
   );
   await createAll("applications", bundle.applications, (p) =>
-    client.send(new CreateApplicationCommand(remapIds(p, idMap))),
+    client.send(new CreateApplicationCommand(asInput(remapIds(p, idMap)))),
   );
 
   return { idMap, created };
