@@ -101,3 +101,22 @@ export const assertReadable = (bundle: { formatVersion: number }): void => {
     );
   }
 };
+
+/**
+ * A carried knowledge base is nested — `{ knowledgeBase, articles }` — because
+ * its articles are a separate resource with their own create call. Reading it
+ * with a rest spread yields `{ knowledgeBase: {...} }`, which a create call
+ * rejects for missing required fields it cannot see, so the split lives here
+ * where it can be tested; bundle.ts cannot be compiled outside the generated
+ * package.
+ */
+export const splitKnowledgeBaseEntry = (
+  entry: Record<string, unknown>,
+): {
+  knowledgeBase: Record<string, unknown>;
+  articles: Record<string, unknown>[];
+} => ({
+  knowledgeBase: (entry.knowledgeBase ?? {}) as Record<string, unknown>,
+  articles: (entry.articles ?? []) as Record<string, unknown>[],
+});
+

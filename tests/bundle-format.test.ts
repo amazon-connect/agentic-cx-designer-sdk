@@ -6,6 +6,7 @@ import {
   IMPORT_ORDER,
   ON_THE_WIRE,
   assertReadable,
+  splitKnowledgeBaseEntry,
   type BundleResourceType,
 } from "../overlay/bundle-format";
 
@@ -76,5 +77,31 @@ describe("assertReadable", () => {
     expect(() =>
       assertReadable({ formatVersion: BUNDLE_FORMAT_VERSION }),
     ).not.toThrow();
+  });
+});
+
+describe("splitKnowledgeBaseEntry", () => {
+  // The export writes a knowledge base nested, since its articles are created
+  // separately. Reading it with a rest spread yields `{ knowledgeBase: {...} }`
+  // and the create call then fails on required fields it cannot see — which is
+  // how a real import first broke, with an opaque "type is required".
+  it("returns the inner knowledge base, not the wrapper", () => {
+    const kb = { knowledgeBaseId: "kb-1", name: "FAQ", type: "articles" };
+    const { knowledgeBase, articles } = splitKnowledgeBaseEntry({
+      knowledgeBase: kb,
+      articles: [{ articleId: "a-1" }],
+    });
+
+    expect(knowledgeBase).toEqual(kb);
+    expect(knowledgeBase).not.toHaveProperty("knowledgeBase");
+    expect(articles).toEqual([{ articleId: "a-1" }]);
+  });
+
+  it("treats a knowledge base with no articles as an empty list", () => {
+    expect(splitKnowledgeBaseEntry({ knowledgeBase: { knowledgeBaseId: "kb-1" } }).articles).toEqual([]);
+  });
+
+  it("does not throw on an entry missing the knowledge base", () => {
+    expect(splitKnowledgeBaseEntry({})).toEqual({ knowledgeBase: {}, articles: [] });
   });
 });

@@ -25,6 +25,7 @@ import type { AgenticCXDesignerClient } from "./wrapper";
 import { remapIds } from "./wrapper";
 import {
   assertReadable,
+  splitKnowledgeBaseEntry,
   type BundleResourceType,
   type CarriedResourceType,
   type ResourceBundle,
@@ -194,11 +195,11 @@ export const importBundle = async (
   // after this point goes through remapIds.
   const knowledgeBases: Record<string, unknown>[] = [];
   for (const entry of bundle.knowledgeBases) {
-    const { articles = [], ...knowledgeBase } = entry as {
-      articles?: Record<string, unknown>[];
-    };
+    const { knowledgeBase, articles } = splitKnowledgeBaseEntry(
+      entry as Record<string, unknown>,
+    );
     const result = (await client.send(
-      new CreateKnowledgeBaseCommand(asInput(knowledgeBase as Record<string, unknown>)),
+      new CreateKnowledgeBaseCommand(asInput(knowledgeBase)),
     )) as { knowledgeBaseId?: string };
 
     const oldId = (knowledgeBase as { knowledgeBaseId?: string })

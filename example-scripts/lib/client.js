@@ -43,10 +43,15 @@ const sdk = require('amazon-connect-acxd-sdk');
 
 /** Build a client from ACXD_* environment configuration. */
 function makeClient() {
+  // ACXD_ENDPOINT is optional: without it the client resolves the production
+  // host from the region, so a non-production key needs it set.
+  const endpoint = process.env.ACXD_ENDPOINT;
+
   return new sdk.AgenticCXDesignerClient({
     region: requireEnv('ACXD_REGION'),
     apiKey: requireEnv('ACXD_API_KEY'),
     workspaceId: requireEnv('ACXD_WORKSPACE_ID'),
+    ...(endpoint ? { endpoint } : {}),
   });
 }
 
