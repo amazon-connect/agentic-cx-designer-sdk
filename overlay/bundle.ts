@@ -26,6 +26,7 @@ import { remapIds } from "./wrapper";
 import {
   assertReadable,
   splitKnowledgeBaseEntry,
+  toClientApplication,
   type BundleResourceType,
   type CarriedResourceType,
   type ResourceBundle,
@@ -232,7 +233,11 @@ export const importBundle = async (
     client.send(new CreateFlowCommand(asInput(remapIds(p, idMap)))),
   );
   await createAll("applications", bundle.applications, (p) =>
-    client.send(new CreateApplicationCommand(asInput(remapIds(p, idMap)))),
+    client.send(
+      new CreateApplicationCommand(
+        asInput(toClientApplication(remapIds(p, idMap))),
+      ),
+    ),
   );
 
   return { idMap, created };

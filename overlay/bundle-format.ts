@@ -120,3 +120,54 @@ export const splitKnowledgeBaseEntry = (
   articles: (entry.articles ?? []) as Record<string, unknown>[],
 });
 
+/**
+ * `DefaultFlows` is a Smithy structure whose members all carry `@jsonName`, so
+ * its wire keys ("ACXD.Welcome") differ from the generated client's member
+ * names ("welcome"). A bundle holds the wire form, because a server writes it,
+ * and the client serialises only members it recognises — so handing it the wire
+ * form drops every entry silently and the application is rejected for having
+ * no default welcome flow.
+ *
+ * Every other field in a bundle has the same wire and client form. This is the
+ * only place the two diverge, which is why nothing else needed converting.
+ */
+const DEFAULT_FLOW_MEMBERS: Record<string, string> = {
+  "ACXD.Welcome": "welcome",
+  "ACXD.Fallback": "fallback",
+  "ACXD.Unknown": "unknown",
+  "ACXD.Escalation": "escalation",
+  "ACXD.Frustration": "frustration",
+  "ACXD.Help": "help",
+  "ACXD.Repeat": "repeat",
+  "ACXD.Resume": "resume",
+};
+
+/**
+ * Rewrites a carried application into what the generated client accepts. Only
+ * `settings.defaultFlows` needs it; an unrecognised key is passed through
+ * rather than dropped, so a default flow added to the service before this SDK
+ * knows about it still reaches the create call.
+ */
+export const toClientApplication = (
+  application: Record<string, unknown>,
+): Record<string, unknown> => {
+  const settings = application.settings as Record<string, unknown> | undefined;
+  const defaultFlows = settings?.defaultFlows as
+    | Record<string, unknown>
+    | undefined;
+  if (!settings || !defaultFlows) return application;
+
+  return {
+    ...application,
+    settings: {
+      ...settings,
+      defaultFlows: Object.fromEntries(
+        Object.entries(defaultFlows).map(([key, value]) => [
+          DEFAULT_FLOW_MEMBERS[key] ?? key,
+          value,
+        ]),
+      ),
+    },
+  };
+};
+
