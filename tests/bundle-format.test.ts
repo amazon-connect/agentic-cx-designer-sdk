@@ -7,6 +7,7 @@ import {
   ON_THE_WIRE,
   assertReadable,
   splitKnowledgeBaseEntry,
+  toClientApplication,
   type BundleResourceType,
 } from "../overlay/bundle-format";
 
@@ -103,5 +104,70 @@ describe("splitKnowledgeBaseEntry", () => {
 
   it("does not throw on an entry missing the knowledge base", () => {
     expect(splitKnowledgeBaseEntry({})).toEqual({ knowledgeBase: {}, articles: [] });
+  });
+});
+
+describe("toClientApplication", () => {
+  // DefaultFlows members all carry @jsonName, so the wire keys the bundle holds
+  // are not the member names the generated client serialises. Hand it the wire
+  // form and every entry is dropped without error, and the application is
+  // rejected for having no default welcome flow — which is how a real import
+  // first failed on its last collection.
+  it("converts the wire keys to the client's member names", () => {
+    const app = toClientApplication({
+      applicationId: "app-1",
+      settings: {
+        defaultFlows: {
+          "ACXD.Welcome": { flowId: "Greeting" },
+          "ACXD.Fallback": { quickReplies: ["Sorry"] },
+        },
+        guardrails: [{ guardrailId: "g-1" }],
+      },
+    });
+
+    expect((app.settings as Record<string, unknown>).defaultFlows).toEqual({
+      welcome: { flowId: "Greeting" },
+      fallback: { quickReplies: ["Sorry"] },
+    });
+  });
+
+  it.each([
+    ["ACXD.Welcome", "welcome"],
+    ["ACXD.Fallback", "fallback"],
+    ["ACXD.Unknown", "unknown"],
+    ["ACXD.Escalation", "escalation"],
+    ["ACXD.Frustration", "frustration"],
+    ["ACXD.Help", "help"],
+    ["ACXD.Repeat", "repeat"],
+    ["ACXD.Resume", "resume"],
+  ])("maps %s to %s", (wire, member) => {
+    const app = toClientApplication({ settings: { defaultFlows: { [wire]: { flowId: "f" } } } });
+    expect((app.settings as Record<string, unknown>).defaultFlows).toEqual({ [member]: { flowId: "f" } });
+  });
+
+  // A default flow the service adds before this SDK knows about it should still
+  // reach the create call rather than being silently discarded here.
+  it("passes an unrecognised key through", () => {
+    const app = toClientApplication({ settings: { defaultFlows: { "ACXD.Future": { flowId: "f" } } } });
+    expect((app.settings as Record<string, unknown>).defaultFlows).toEqual({ "ACXD.Future": { flowId: "f" } });
+  });
+
+  it("leaves everything else on the application untouched", () => {
+    const app = toClientApplication({
+      applicationId: "app-1",
+      name: "Store",
+      settings: { defaultFlows: { "ACXD.Welcome": { flowId: "f" } }, conversationTTL: 5 },
+    });
+
+    expect(app.applicationId).toBe("app-1");
+    expect(app.name).toBe("Store");
+    expect((app.settings as Record<string, unknown>).conversationTTL).toBe(5);
+  });
+
+  it.each([
+    ["no settings", { applicationId: "app-1" }],
+    ["settings without defaultFlows", { settings: { conversationTTL: 5 } }],
+  ])("returns an application with %s unchanged", (_label, input) => {
+    expect(toClientApplication(input)).toEqual(input);
   });
 });
