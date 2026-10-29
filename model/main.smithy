@@ -149,8 +149,6 @@ service AgenticCXDesignerService {
         GetWorkspace
         UpdateWorkspace
         DeleteWorkspace
-        ExportResource
-        GetResourceExport
     ]
     errors: [
         ValidationException
