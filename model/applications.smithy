@@ -531,6 +531,8 @@ structure ApplicationDeployment {
 
     contextVariables: ContextVariableValueList
 
+    apiKey: SensitiveString
+
     @required
     createdAt: DateTime
 
@@ -556,8 +558,6 @@ structure ApplicationSettings {
     languageSettings: LanguageSettingList
 
     guardrails: GuardrailReferenceList
-
-    lifecycleHooks: LifecycleHooks
 
     defaultFlows: DefaultFlows
 
@@ -589,14 +589,6 @@ structure LanguageSetting {
     projectId: String
 
     voice: String
-}
-
-structure LifecycleHooks {
-    conversationStart: UUIDv4
-    conversationEnd: UUIDv4
-    escalation: UUIDv4
-    stateModification: UUIDv4
-    messageReceived: UUIDv4
 }
 
 structure DefaultFlows {

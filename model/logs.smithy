@@ -41,10 +41,6 @@ enum LogEventType {
 
     FLOW_REDIRECTION = "FlowRedirection"
 
-    LIFECYCLE_HOOK_INVOKED = "LifecycleHookInvoked"
-
-    LIFECYCLE_HOOK_RESPONDED = "LifecycleHookResponded"
-
     NLU_REQUEST_RECEIVED = "NluRequestReceived"
 
     NLU_RESPONDED = "NluResponded"
@@ -56,6 +52,18 @@ enum LogEventType {
     REPEAT_STATE = "RepeatState"
 
     STATE_VALUES_EJECTED = "StateValuesEjected"
+
+    STATE_VALUES_SET = "StateValuesSet"
+
+    STATE_VALUES_PUSH = "StateValuesPush"
+
+    STATE_VALUES_POP = "StateValuesPop"
+
+    STATE_VALUES_SHIFTED = "StateValuesShifted"
+
+    STATE_VALUES_INCREMENTED = "StateValuesIncremented"
+
+    STATE_VALUES_DECREMENTED = "StateValuesDecremented"
 
     DATA_REQUEST_RESOLUTION_FAILED = "DataRequestResolutionFailed"
 
@@ -142,8 +150,6 @@ enum LogEventType {
     LOOP_ITERATION = "LoopIteration"
 
     INFINITE_LOOP = "InfiniteLoop"
-
-    LIFECYCLE_HOOK_VALIDATION_FAILED = "LifecycleHookValidationFailed"
 
     WEBHOOK_RESPONSE_VALIDATION_FAILED = "WebhookResponseValidationFailed"
 

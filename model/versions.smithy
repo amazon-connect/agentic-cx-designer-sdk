@@ -42,7 +42,6 @@ enum VersionedResourceType {
     FLOWS = "flows"
     DATA_REQUESTS = "dataRequests"
     ACTIONS = "actions"
-    LIFECYCLE_HOOKS = "lifecycleHooks"
     JOURNEYS = "journeys"
     GUARDRAILS = "guardrails"
     FEEDBACK_CONFIGS = "feedbackConfigs"
@@ -103,7 +102,6 @@ union ResourceVersionData {
     flow: Document
     dataRequest: Document
     action: Document
-    lifecycleHook: Document
     journey: Document
     guardrail: Document
     feedbackConfig: Document

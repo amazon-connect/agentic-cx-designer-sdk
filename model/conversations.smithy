@@ -116,6 +116,9 @@ structure ListConversationsRequest {
     @httpQuery("timezone")
     timezone: String
 
+    @httpQuery("download")
+    download: BooleanString
+
     @httpQuery("nextToken")
     nextToken: String
 
@@ -125,10 +128,13 @@ structure ListConversationsRequest {
 }
 
 structure ListConversationsResponse {
-    @required
     items: ConversationSummaryList
 
     nextToken: String
+
+    downloadId: UUIDv4
+
+    status: DownloadStatus
 }
 
 // ============================================================================

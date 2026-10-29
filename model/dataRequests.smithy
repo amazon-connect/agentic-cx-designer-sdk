@@ -90,6 +90,7 @@ enum DataRequestFieldType {
 enum WebhookImplementation {
     INLINE_STATIC = "inline-static"
     EXTERNAL = "external"
+    FLOW_MODULE = "flow-module"
     MCP = "mcp"
 }
 
@@ -238,9 +239,42 @@ structure WebhookConfig {
 
     provider: WebhookProvider
 
+    flowModule: FlowModuleConfig
+
+    flowModuleEnvironments: FlowModuleEnvironments
+
     mcp: WebhookMcpConfig
 
     sendContext: Boolean
+}
+
+structure FlowModuleConfig {
+    @required
+    @length(min: 1, max: 256)
+    moduleId: String
+
+    alias: String
+
+    @range(min: 1)
+    version: Integer
+
+    @length(max: 200000)
+    mockResponse: String
+}
+
+structure FlowModuleEnvironments {
+    production: FlowModuleEnvironment
+    development: FlowModuleEnvironment
+}
+
+structure FlowModuleEnvironment {
+    @length(min: 1, max: 256)
+    moduleId: String
+
+    alias: String
+
+    @range(min: 1)
+    version: Integer
 }
 
 structure WebhookMcpConfig {

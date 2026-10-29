@@ -148,16 +148,15 @@ enum ChoiceDisplayFormat {
     DROPDOWN = "dropdown"
 }
 
-enum GroundingType {
-    WEB = "web"
-    DATASTORE = "datastore"
-    NONE = "none"
-}
-
 enum GenerativeJourneyModalityTriggerType {
     MCP_FLOW = "mcpFlow"
     DATA_REQUEST = "dataRequest"
     KNOWLEDGE_BASE = "knowledgeBase"
+}
+
+enum PromptVersion {
+    V1_0_1 = "1.0.1"
+    V2_0_1 = "2.0.1"
 }
 
 structure GenerativeJourneyModalityTrigger {
@@ -607,8 +606,6 @@ structure GenerativeTextConfig {
 
     modelType: GenerativeModelType
 
-    groundingType: GroundingType
-
     timeout: Integer
 
     autoTranslate: Boolean
@@ -625,6 +622,8 @@ structure GenerativeJourneyConfig {
     dataCapture: DataCaptureConfig
 
     prompt: String
+
+    promptVersion: PromptVersion
 
     modelType: GenerativeModelType
 
@@ -653,6 +652,9 @@ structure GenerativeJourneyTool {
     modalityId: String
     prompt: String
     payload: Document
+
+    @range(min: 1, max: 30000)
+    timeoutMs: Integer
 }
 
 structure DataCaptureConfig {
@@ -710,10 +712,21 @@ structure KnowledgeBaseNodeConfig {
 
 structure LoopConfig {
     type: LoopType
+
+    startOperand: Operand
+
+    endOperand: Operand
+
+    @deprecated(message: "Use startOperand, which also covers a bound read out of the conversation.")
     start: Integer
+
+    @deprecated(message: "Use endOperand, which also covers a bound read out of the conversation.")
     end: Integer
+
     localId: String
+
     variableId: String
+
     name: String
 }
 
