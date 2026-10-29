@@ -128,7 +128,6 @@ operation ListKnowledgeBasePublications {
 enum KnowledgeBaseType {
     ARTICLES = "articles"
     DOCUMENTS = "documents"
-    CONNECT_KNOWLEDGE_BASE = "connectKnowledgeBase"
 }
 
 /// Creation status of a knowledge base.
