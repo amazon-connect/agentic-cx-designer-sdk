@@ -15,6 +15,7 @@ operation GetDownload {
     errors: [
         ValidationException
         ResourceNotFoundException
+        ConflictException
         InternalServerException
     ]
 }
@@ -39,4 +40,10 @@ structure GetDownloadResponse {
 enum BooleanString {
     TRUE = "true"
     FALSE = "false"
+}
+
+enum DownloadStatus {
+    IN_PROGRESS = "IN_PROGRESS"
+    SUCCEEDED = "SUCCEEDED"
+    FAILED = "FAILED"
 }
