@@ -537,6 +537,9 @@ structure NodeDataRequest {
     name: String
     provider: String
     action: String
+
+    /// Which of the data request's MCP tools this node invokes.
+    toolName: McpToolName
 }
 
 // ============================================================================
