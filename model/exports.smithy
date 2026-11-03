@@ -46,12 +46,27 @@ enum ExportableResourceType {
 @length(min: 1, max: 128)
 string IdempotencyToken
 
-structure ExportResourceRequest {
+/// A resource to export, and everything it depends on.
+structure ExportTarget {
     @required
     resourceType: ExportableResourceType
 
     @required
     resourceIdentifier: String
+}
+
+@length(min: 1, max: 50)
+list ExportTargets {
+    member: ExportTarget
+}
+
+structure ExportResourceRequest {
+    /// The resources to export. Several go into one bundle rather than one
+    /// bundle each, so a dependency they share is carried once: as separate
+    /// bundles it appears in every one of them, and importing the second
+    /// collides on creating it.
+    @required
+    resources: ExportTargets
 
     @idempotencyToken
     clientToken: IdempotencyToken

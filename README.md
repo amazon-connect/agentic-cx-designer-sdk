@@ -301,10 +301,10 @@ would be rewritten inside any text that happens to contain it.
 
 ### Exporting and importing a bundle
 
-`exportBundle` takes a resource and everything reachable from it; `importBundle` creates
-the lot in another workspace, in dependency order, remapping the ids the backend assigns
-on the way. The format is the one Agentic CX Designer Studio reads and writes, so a
-bundle moves between the two.
+`exportBundle` takes one or more resources and everything reachable from them;
+`importBundle` creates the lot in another workspace, in dependency order, remapping the
+ids the backend assigns on the way. The format is the one Agentic CX Designer Studio
+reads and writes, so a bundle moves between the two.
 
 ```javascript
 import { exportBundle, importBundle } from "amazon-connect-acxd-sdk";
@@ -317,23 +317,40 @@ const bundle = await exportBundle(source, {
 const { idMap, created } = await importBundle(target, bundle);
 ```
 
+Several resources come back as **one** bundle rather than one bundle each:
+
+```javascript
+const bundle = await exportBundle(source, [
+  { resourceType: "flows", resourceId: "MainFlow" },
+  { resourceType: "flows", resourceId: "Billing" },
+]);
+```
+
+That matters when the selection overlaps, which is the usual case. A slot type both
+flows use is carried once and created once. Exported as separate bundles it appears in
+each of them, and importing the second fails on creating a slot type that already
+exists — leaving the workspace half-populated, since `importBundle` does not roll back.
+
 The dependency set is computed by the service from its resource graph rather than from
 reading the resource's own settings, so something several hops away — a slot type used by
 a flow that another flow redirects to — comes along too.
 
 Some resources are named but not carried, and land in `bundle.unsupported` with a reason:
-a secret, because its value is never returned by the API; a handoff target, because
-another application is its own export; a live sync script reached from an application,
-for the same reason. Read it and tell whoever imports the bundle what they still have to
-set up by hand.
+a secret, because its value is never returned by the API; a handoff target or a live sync
+script reached from an application, because an application and a script are carried only
+when asked for by name. Select them alongside it and they come too. Read `unsupported`
+and tell whoever imports the bundle what they still have to set up by hand.
+
+A bundle records no distinction between what you asked for and what came along — an
+importer creates every collection in dependency order, so it never needed one.
 
 `importBundle` throws on the first failure and does not roll back — what it already
 created stays. The `idMap` it returns is what you need to reconcile a partial run, so
 keep it.
 
-Accepted root types are `applications`, `flows`, `slotTypes`, `dataRequests`,
+Exportable types are `applications`, `flows`, `slotTypes`, `dataRequests`,
 `contextVariables`, `analyticsTags`, `liveSyncScripts`, `knowledgeBases`, `modalities`
-and `guardrails`.
+and `guardrails`. One export may name up to 50 of them.
 
 #### Exporting without the helper
 
@@ -355,8 +372,7 @@ Drive it yourself if you would rather not hold a connection open for the duratio
 ```javascript
 const { downloadId } = await client.send(
   new ExportResourceCommand({
-    resourceType: "applications",
-    resourceIdentifier: applicationId,
+    resources: [{ resourceType: "applications", resourceIdentifier: applicationId }],
   }),
 );
 

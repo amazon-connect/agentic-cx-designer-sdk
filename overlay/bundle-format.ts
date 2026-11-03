@@ -29,9 +29,9 @@ export type BundleResourceType =
   | "guardrails";
 
 /**
- * `root.type` and `unsupported[].type` are written with the validator's resource
- * names, not this SDK's, because that is what Studio writes and reads. Changing
- * it would make bundles from the two sides mutually unreadable.
+ * `unsupported[].type` is written with the validator's resource names, not this
+ * SDK's, because that is what Studio writes and reads. Changing it would make
+ * bundles from the two sides mutually unreadable.
  */
 export const ON_THE_WIRE: Record<BundleResourceType, string> = {
   applications: "bot",
@@ -88,9 +88,15 @@ export interface UnsupportedResource {
   reason: string;
 }
 
+/**
+ * A bundle does not record which resources were asked for and which came along
+ * as a dependency: an importer creates every collection in dependency order, so
+ * it never needed to know. A resource that was not asked for and cannot be
+ * re-created is in `unsupported` rather than in its collection, which answers
+ * the one question that mattered.
+ */
 export type ResourceBundle = {
   formatVersion: number;
-  root: { type: string; id: string };
   unsupported: UnsupportedResource[];
 } & { [K in CarriedResourceType]: Record<string, unknown>[] };
 

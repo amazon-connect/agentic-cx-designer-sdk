@@ -54,12 +54,23 @@ export interface ExportOptions {
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+/** A resource to export, and everything it depends on. */
+export interface ExportTarget {
+  resourceType: CarriedResourceType;
+  resourceId: string;
+}
+
 /**
- * Export `resourceId` together with every resource reachable from it.
+ * Export one or more resources together with everything they depend on.
  *
  * The dependency set is computed by the service from its resource graph rather
- * than from reading the resource's own settings, so something several hops away
+ * than from reading each resource's own settings, so something several hops away
  * — a slot type used by a flow that another flow redirects to — is carried too.
+ *
+ * Several resources come back as one bundle rather than one bundle each, so a
+ * dependency they share is carried once and created once on import. As separate
+ * bundles it appears in every one of them, and importing the second collides on
+ * creating it.
  *
  * The export is asynchronous because a bundle for a large workspace exceeds what
  * a single response can carry. This starts it, polls until the file is ready,
@@ -67,22 +78,34 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
  * generating" signal and is what the polling loop waits on.
  *
  * @example
- * const bundle = await exportBundle(client, {
+ * const one = await exportBundle(client, {
  *   resourceType: "applications",
  *   resourceId: applicationId,
  * });
+ *
+ * const several = await exportBundle(client, [
+ *   { resourceType: "flows", resourceId: "MainFlow" },
+ *   { resourceType: "flows", resourceId: "Billing" },
+ * ]);
  */
 export const exportBundle = async (
   client: AgenticCXDesignerClient,
-  root: { resourceType: CarriedResourceType; resourceId: string },
+  targets: ExportTarget | ExportTarget[],
   options: ExportOptions = {},
 ): Promise<ResourceBundle> => {
   const { timeoutMs = 600_000, pollIntervalMs = 2_000, clientToken } = options;
+  const selection = Array.isArray(targets) ? targets : [targets];
+
+  if (selection.length === 0) {
+    throw new Error("exportBundle needs at least one resource to export.");
+  }
 
   const started = await client.send(
     new ExportResourceCommand({
-      resourceType: root.resourceType,
-      resourceIdentifier: root.resourceId,
+      resources: selection.map(({ resourceType, resourceId }) => ({
+        resourceType,
+        resourceIdentifier: resourceId,
+      })),
       ...(clientToken === undefined ? {} : { clientToken }),
     }),
   );
