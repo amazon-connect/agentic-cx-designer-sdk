@@ -107,6 +107,7 @@ structure ListConversationsRequest {
     @httpQuery("sortOrder")
     sortOrder: SortOrder
 
+    @deprecated(message: "Has no effect on ListConversations. Use GetConversation with includeSilence to include silent turns.")
     @httpQuery("includeSilence")
     includeSilence: Boolean
 

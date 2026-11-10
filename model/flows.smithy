@@ -514,6 +514,15 @@ structure FlowNodeMetadata {
 
     @range(max: 30000)
     timeout: Integer
+
+    async: Boolean
+
+    inProgressEnabled: Boolean
+
+    @range(max: 30000)
+    inProgressTimeout: Integer
+
+    split: SplitConfig
 }
 
 structure NodeAnalyticsTag {
@@ -533,10 +542,14 @@ structure NodeDataRequest {
     urlParams: Document
     headers: Document
     payload: Document
+    params: Document
     alwaysRetrigger: Boolean
     name: String
     provider: String
     action: String
+
+    @length(min: 1, max: 256)
+    toolName: String
 }
 
 // ============================================================================
@@ -597,6 +610,16 @@ structure DefineConfig {
     schema: Document
     schemaId: Document
     value: Operand
+}
+
+structure SplitConfig {
+    modelType: SplitModelType
+}
+
+enum SplitModelType {
+    AMAZON_NOVA_2_LITE = "amazon-nova-2-lite"
+    ANTHROPIC_HAIKU_4_5 = "anthropic.claude-haiku-4-5"
+    ANTHROPIC_SONNET_5 = "anthropic.claude-sonnet-5"
 }
 
 structure GenerativeTextConfig {

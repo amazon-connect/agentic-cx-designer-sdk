@@ -249,12 +249,6 @@ structure LogSearchFilter {
 structure LogQueryStatus {
     @required
     progressPercentage: Double
-
-    @required
-    cumulativeBytesScanned: Long
-
-    @required
-    cumulativeBytesMetered: Long
 }
 
 structure LogEntry {

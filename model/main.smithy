@@ -149,6 +149,14 @@ service AgenticCXDesignerService {
         GetWorkspace
         UpdateWorkspace
         DeleteWorkspace
+        GetWorkspaceLanguages
+        UpdateWorkspaceLanguages
+        PropagateWorkspaceLanguages
+        GetResourceTranslations
+        PutResourceTranslations
+        StartTranslationJob
+        ListTranslationJobs
+        GetTranslationJob
     ]
     errors: [
         ValidationException
