@@ -164,6 +164,8 @@ structure CreateGuardrailRequest {
     metadata: GuardrailMetadata
 
     fallbackBehavior: FallbackBehavior
+
+    modelType: GenerativeModelType
 }
 
 structure GetGuardrailRequest {
@@ -190,6 +192,8 @@ structure UpdateGuardrailRequest {
     metadata: GuardrailMetadata
 
     fallbackBehavior: FallbackBehavior
+
+    modelType: GenerativeModelType
 }
 
 structure DeleteGuardrailRequest {
@@ -308,6 +312,8 @@ structure Guardrail {
     metadata: GuardrailMetadata
 
     fallbackBehavior: FallbackBehavior
+
+    modelType: GenerativeModelType
 
     createdAt: DateTime
 

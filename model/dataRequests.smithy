@@ -311,6 +311,9 @@ structure McpTool {
     @length(min: 1, max: 256)
     name: String
 
+    @length(max: 4096)
+    description: String
+
     enabled: Boolean
 
     requestSchema: Document
