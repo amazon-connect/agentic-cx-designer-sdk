@@ -207,7 +207,9 @@ enum GenerativeModelType {
     AMAZON_NOVA_MICRO = "amazon-nova-micro"
     AMAZON_NOVA_2_LITE = "amazon-nova-2-lite"
     ANTHROPIC_HAIKU_4_5 = "anthropic.claude-haiku-4-5"
+    ANTHROPIC_HAIKU_5_5 = "anthropic.claude-haiku-5-5"
     ANTHROPIC_SONNET_5 = "anthropic.claude-sonnet-5"
+    ANTHROPIC_SONNET_5_5 = "anthropic.claude-sonnet-5-5"
 }
 
 enum FlowStateModificationType {
