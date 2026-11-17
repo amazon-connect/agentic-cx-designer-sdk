@@ -80,6 +80,8 @@ structure CreateContextVariableRequest {
     schema: Document
 
     disallowExternalModification: Boolean
+
+    metadata: ContextVariableMetadata
 }
 
 structure UpdateContextVariableRequest {
@@ -90,6 +92,8 @@ structure UpdateContextVariableRequest {
     schema: Document
 
     disallowExternalModification: Boolean
+
+    metadata: ContextVariableMetadata
 }
 
 structure DeleteContextVariableRequest {
