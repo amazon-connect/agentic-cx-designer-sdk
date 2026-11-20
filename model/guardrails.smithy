@@ -114,6 +114,8 @@ enum DetectionMethod {
     REGEX = "regex"
     KEYWORD = "keyword"
     LLM_JUDGE = "llmJudge"
+
+    CONDITIONAL = "conditional"
 }
 
 enum EnforcementAction {
@@ -403,6 +405,38 @@ structure Detection {
     prompt: String
 
     threshold: Float
+
+    conditions: GuardrailConditionGroups
+}
+
+structure GuardrailConditionGroups {
+    @required
+    operator: GuardrailConditionGroupsOperator
+
+    @required
+    @length(min: 1, max: 10)
+    items: GuardrailConditionGroupList
+}
+
+list GuardrailConditionGroupList {
+    member: GuardrailConditionGroup
+}
+
+structure GuardrailConditionGroup {
+    @required
+    operator: GuardrailConditionGroupOperator
+
+    @required
+    @length(min: 1, max: 10)
+    conditions: ConditionList
+}
+
+enum GuardrailConditionGroupsOperator {
+    OR = "or"
+}
+
+enum GuardrailConditionGroupOperator {
+    AND = "and"
 }
 
 structure Enforcement {
